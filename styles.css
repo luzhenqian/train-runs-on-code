@@ -1,0 +1,15 @@
+@font-face {
+  font-family: "SOURCEHANSANSCN";
+  src: url("./assets/fonts/SOURCEHANSANSCN-MEDIUM.OTF");
+}
+
+@font-face {
+  font-family: "huakang";
+  src: url("./assets/fonts/华康海报体W12.ttf");
+}
+
+.bg {
+  background: url("./assets/images/bottom-bg.png") no-repeat;
+  height: 20vh;
+  background-size: 100% 100%;
+}
