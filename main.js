@@ -8,7 +8,8 @@ let scene;
 let camera;
 let controls;
 
-let mixer;
+let terrainMixer;
+let trainMixer;
 let clock = new THREE.Clock();
 let railway;
 let train = [];
@@ -99,8 +100,8 @@ function loadModel() {
     // })
 
     // Create a mixer
-    mixer = new THREE.AnimationMixer(model);
-    mixer.clipAction(gltf.animations[0]).play();
+    terrainMixer = new THREE.AnimationMixer(model);
+    terrainMixer.clipAction(gltf.animations[0]).play();
   })
 
 
@@ -113,8 +114,8 @@ function loadModel() {
     // mixer = new THREE.AnimationMixer(model);
     // mixer.clipAction(gltf.animations[0]).play();
 
-    mixer = new THREE.AnimationMixer(model);
-    mixer.clipAction(gltf.animations[0]).play();
+    trainMixer = new THREE.AnimationMixer(model);
+    trainMixer.clipAction(gltf.animations[0]).play();
   })
 
 
@@ -134,8 +135,11 @@ function animate() {
 
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
-  if (mixer) {
-    mixer.update(delta);
+  if (terrainMixer) {
+    terrainMixer.update(delta);
+  }
+  if (trainMixer) {
+    trainMixer.update(delta);
   }
   controls.update();
   renderer.render(scene, camera);
