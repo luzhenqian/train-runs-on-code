@@ -12,7 +12,6 @@ class Game {
   trainMixer = null;
   clock = new THREE.Clock();
   railway = null;
-  train = [];
   start = false
   trainAnimation = null
   goodsMeshes = []
@@ -31,20 +30,24 @@ class Game {
     'wood',
     'gpu'
   ]
+  materials = {}
   // ui elements
   btnEls = []
   goodsEls = []
   countdownEl = null
   loadingEl = null
   msgEl = null
+  refreshEl = null
+  accountBalanceEl = null
+  neededGoodsEls = []
   // arguments
-  dwellTime = 3_000
-  countdown = 3
+  dwellTime = 5_000
+  countdown = 10
   start = false
   accountBalance = 1000
-  accountBalanceEl = null
+  // meshes
   cityMeshes = []
-  neededGoodsEls = null
+  cabinMeshes = []
   loadedGoods = []
   neededGoods = []
   producedGoods = []
@@ -54,6 +57,7 @@ class Game {
     this.autoScale();
   }
   initCanvas() {
+    this.initMaterials()
     this.initRenderer()
     this.initScene()
     this.initCamera()
@@ -83,26 +87,13 @@ class Game {
       $("#needed-goods-five")
     ]
     this.accountBalanceEl = $('#account-balance')
-
-    const makeVisibleFn = () => {
-      let i = 0
-      return () => {
-        if (i === this.goodsMeshes.length) {
-          i = 0
-        }
-        this.goodsMeshes[i++].visible = true
-      }
-    }
-
-    const visible = makeVisibleFn()
+    this.refreshEl = $('#refresh')
 
     this.btnEls.forEach((btnEl, idx) => {
       btnEl.on('click', () => {
         const goods = this.producedGoods[idx]
-        this.goodsMeshes[2].material.map = this.goodsMeshes[1].material.map
-        this.goodsMeshes[1].material.map = this.goodsMeshes[0].material.map
-        this.goodsMeshes[0].material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
-        visible()
+        this.loadedGoods.unshift(goods)
+        this.goodsMeshRenderer()
       })
     })
   }
@@ -126,7 +117,7 @@ class Game {
     loader.load('./assets/images/game-bg.png', function (texture) {
       scene.background = texture;
     });
-    scene.add(new THREE.AxesHelper(3));
+    // scene.add(new THREE.AxesHelper(3));
   }
   initControls() {
     // Create a Controls
@@ -143,13 +134,23 @@ class Game {
     const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmremGenerator.fromScene(new RoomEnvironment()).texture;
   }
+  initMaterials() {
+    const loader = new THREE.TextureLoader();
+    this.goods.forEach(goods => {
+      loader.load(`./assets/images/goods_${goods}_on@3x.png`, (texture) => {
+        texture.needsUpdate = true
+        this.materials[goods] = new THREE.MeshBasicMaterial({
+          map: texture,
+        })
+      })
+    })
+  }
   loadModel() {
     const loader = new GLTFLoader();
     loader.load('./assets/model/terrain.gltf', (gltf) => {
       const model = gltf.scene;
       model.scale.set(this.modelScale, this.modelScale, this.modelScale);
       model.children.forEach(child => {
-        console.log(child.name);
         if (child.name === 'castle_T1') {
           this.cityMeshes[0] = child
         }
@@ -178,16 +179,22 @@ class Game {
 
       model.children.forEach(child => {
         if (child.name === 'locomotive-wagon-western1') {
-          this.western1 = child
-          this.goodsMeshes[0] = this.makeGoods(child)
+          this.cabinMeshes[0] = child
         }
         if (child.name === 'locomotive-wagon-western2') {
-          this.western2 = child
-          this.goodsMeshes[1] = this.makeGoods(child)
+          this.cabinMeshes[1] = child
         }
         if (child.name === 'locomotive-wagon-western3') {
-          this.western3 = child
-          this.goodsMeshes[2] = this.makeGoods(child);
+          this.cabinMeshes[2] = child
+        }
+        if (child.name === 'box1_') {
+          this.goodsMeshes[0] = child;
+        }
+        if (child.name === 'box2') {
+          this.goodsMeshes[1] = child;
+        }
+        if (child.name === 'box3') {
+          this.goodsMeshes[2] = child;
         }
       })
 
@@ -215,11 +222,14 @@ class Game {
     }
     this.msgEl.css('opacity', '1')
     this.accountBalanceEl.text(`${this.accountBalance}￥`)
+
+    this.loadedGoods = []
+    this.goodsMeshRenderer()
   }
   departure() {
-    this.goodsMeshes.forEach(goodsMesh => goodsMesh.visible = false)
+    // this.goodsMeshes.forEach(goodsMesh => goodsMesh.visible = false)
     this.btnEls.forEach(btnEl => btnEl.hide())
-    this.disableGoods()
+    this.disableGoodsControl()
     this.msgEl.css('opacity', '0')
   }
   settlement() {
@@ -228,23 +238,6 @@ class Game {
     let res = -100
     this.accountBalance += res
     return res
-  }
-  makeGoods(containerMesh) {
-    const geometry = new THREE.BoxGeometry(
-      this.goodsSize,
-      this.goodsSize,
-      this.goodsSize);
-    const material = new THREE.MeshBasicMaterial({
-      map: null
-    });
-    const goods = new THREE.Mesh(geometry, material);
-    var { x, y, z } = containerMesh.position;
-    goods.position.x = x * this.modelScale - 0.35
-    goods.position.y = y * this.modelScale + 0.22
-    goods.position.z = z * this.modelScale
-    containerMesh.children.push(goods)
-    goods.visible = false
-    return goods;
   }
   autoScale() {
     window.addEventListener('resize', () => {
@@ -262,6 +255,7 @@ class Game {
     }
     if (this.start && this.trainMixer) {
       this.trainMixer.update(delta);
+      // this.goodsMeshRenderer()
     }
 
     this.controls.update();
@@ -270,21 +264,22 @@ class Game {
   play() {
     let countdown = this.countdown;
     this.countdownEl.text(`${countdown -= 1}s`)
-    // this.disableGoods()
+    this.disableGoodsControl()
     const timer = setInterval(() => {
       this.countdownEl.text(`${countdown -= 1}s`)
       if (countdown === 0) {
         this.loadingEl.hide()
+        this.activeGoodsControl()
         clearInterval(timer)
         this.start = true
 
         this.randomGoods()
         this.makeNeededGoods()
         setTimeout(this.trainAnimationPlay.bind(this), this.dwellTime)
-
-        this.animate()
       }
     }, 1_000)
+
+    this.animate()
   }
   randomGoods() {
     for (let i = 0; i < 3; i++) {
@@ -314,7 +309,7 @@ class Game {
     this.neededGoods.forEach((goods, idx) => {
       this.neededGoodsEls[idx].find('img').attr(
         'src',
-        `./assets/images/goods_${goods}_on@2x.png`
+        `./assets/images/goods_${goods}_on@3x.png`
       )
     })
   }
@@ -350,15 +345,40 @@ class Game {
       }, this.dwellTime)
     });
   }
-  disableGoods() {
+  disableGoodsControl() {
     this.goodsEls.forEach((goodsEl, idx) => {
       goodsEl.css(
         'background-image',
-        `url(./assets/images/goods_${this.producedGoods[idx]}_off@2x.png)`
+        `url(./assets/images/goods_${this.producedGoods[idx] || 'gpu'}_off@2x.png)`
       )
     })
     this.btnEls.forEach((btnEl) => {
       btnEl.hide()
+    })
+    this.refreshEl.css(
+      'filter',
+      'grayscale(100%)'
+    )
+  }
+  activeGoodsControl() {
+    this.btnEls.forEach((btnEl) => {
+      btnEl.show()
+    })
+
+    this.refreshEl.css(
+      'filter',
+      'none'
+    )
+  }
+  goodsMeshRenderer() {
+    this.goodsMeshes.forEach((goodsMesh, idx) => {
+      const goods = this.loadedGoods[idx]
+      if (!goods) {
+        goodsMesh.visible = false
+        return
+      }
+      goodsMesh.material = this.materials[goods]
+      goodsMesh.visible = true
     })
   }
 }
