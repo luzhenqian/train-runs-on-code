@@ -37,18 +37,20 @@ class Game {
     'gpu'
   ]
   // ui elements
-  btn1El = null
-  btn2El = null
-  btn3El = null
+  btnOneEl = null
+  btnTwoEl = null
+  btnThreeEl = null
   goods1El = null
   goods2El = null
   goods3El = null
   countdownEl = null
   loadingEl = null
+  msgEl = null
   // arguments
   dwellTime = 3_000
   countdown = 3
   start = false
+  accountBalance = 1000
   city1 = null
   city2 = null
   city3 = null
@@ -59,6 +61,7 @@ class Game {
   demandGoodsThreeEl = $("#demand-goods-three")
   demandGoodsFourEl = $("#demand-goods-four")
   demandGoodsFiveEl = $("#demand-goods-five")
+  accountBalanceEl = $("#account-balance")
   constructor() {
     this.initCanvas();
     this.initUI();
@@ -73,14 +76,15 @@ class Game {
     this.initEnvironment()
   }
   initUI() {
-    this.btn1El = $('#btn1')
-    this.btn2El = $('#btn2')
-    this.btn3El = $('#btn3')
+    this.btnOneEl = $('#btn1')
+    this.btnTwoEl = $('#btn2')
+    this.btnThreeEl = $('#btn3')
     this.goods1El = $('#goods1')
     this.goods2El = $('#goods2')
     this.goods3El = $('#goods3')
     this.countdownEl = $('#countdown')
     this.loadingEl = $('#loading')
+    this.msgEl = $('#msg')
 
     const makeVisibleFn = () => {
       let i = 0
@@ -91,7 +95,7 @@ class Game {
           this.goods3,
         ]
         if (i === goodsMeshes.length) {
-          return
+          i = 0
         }
         goodsMeshes[i++].visible = true
       }
@@ -99,21 +103,21 @@ class Game {
 
     const visible = makeVisibleFn()
 
-    this.btn1El.on('click', () => {
+    this.btnOneEl.on('click', () => {
       const goods = this.goods1El.data('goods')
       this.goods3.material.map = this.goods2.material.map
       this.goods2.material.map = this.goods1.material.map
       this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
       visible()
     })
-    this.btn2El.on('click', () => {
+    this.btnTwoEl.on('click', () => {
       const goods = this.goods2El.data('goods')
       this.goods3.material.map = this.goods2.material.map
       this.goods2.material.map = this.goods1.material.map
       this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
       visible()
     })
-    this.btn3El.on('click', () => {
+    this.btnThreeEl.on('click', () => {
       const goods = this.goods3El.data('goods')
       this.goods3.material.map = this.goods2.material.map
       this.goods2.material.map = this.goods1.material.map
@@ -214,20 +218,41 @@ class Game {
     })
   }
   arrival() {
-    this.btn1El.show()
-    this.btn2El.show()
-    this.btn3El.show()
+    this.btnOneEl.show()
+    this.btnTwoEl.show()
+    this.btnThreeEl.show()
     this.randomGoods()
     this.makeDemandGoods()
+    const profit = this.settlement()
+    if (profit > 0) {
+      this.msgEl.text(`本次盈利！+${profit}￥`)
+      this.msgEl.css('color', '#C0FF00')
+    } else if (profit === 0) {
+      this.msgEl.text(`本次没有获利！`)
+      this.msgEl.css('color', 'white')
+    } else {
+      this.msgEl.text(`本次亏损！${profit}￥`)
+      this.msgEl.css('color', '#FF001E')
+    }
+    this.msgEl.css('opacity', '1')
+    this.accountBalanceEl.text(`${this.accountBalance}￥`)
   }
   departure() {
     this.goods1.visible = false;
     this.goods2.visible = false;
     this.goods3.visible = false;
-    this.btn1El.hide()
-    this.btn2El.hide()
-    this.btn3El.hide()
+    this.btnOneEl.hide()
+    this.btnTwoEl.hide()
+    this.btnThreeEl.hide()
     this.disableGoods()
+    this.msgEl.css('opacity', '0')
+  }
+  settlement() {
+    // 每次消耗燃料 -50
+    // 每卖出一件商品 +50
+    let res = -100
+    this.accountBalance += res
+    return res
   }
   makeGoods(containerMesh) {
     const geometry = new THREE.BoxGeometry(
@@ -270,6 +295,7 @@ class Game {
   play() {
     let countdown = this.countdown;
     this.countdownEl.text(`${countdown -= 1}s`)
+    // this.disableGoods()
     const timer = setInterval(() => {
       this.countdownEl.text(`${countdown -= 1}s`)
       if (countdown === 0) {
@@ -279,11 +305,11 @@ class Game {
 
         this.randomGoods()
         this.makeDemandGoods()
-        this.trainAnimationPlay()
+        setTimeout(this.trainAnimationPlay.bind(this), this.dwellTime)
+
+        this.animate()
       }
     }, 1_000)
-
-    this.animate()
   }
   randomGoods() {
     const goodsArr = []
@@ -302,15 +328,26 @@ class Game {
     this.goods3El.data('goods', goodsArr[2])
   }
   makeDemandGoods() {
-    // const geometry = new THREE.BoxGeometry(1, 1, 1);
-    // const material = new THREE.MeshBasicMaterial({ color: 0xf0f04f })
-    // const cube = new THREE.Mesh(geometry, material);
-    // cube.position.set(
-    //   this.city1.position.x * this.modelScale,
-    //   this.city1.position.y * this.modelScale,
-    //   this.city1.position.z * this.modelScale,
-    // )
-    // this.scene.add(cube)
+    this.demandGoodsOneEl.find('img').attr(
+      'src',
+      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
+    )
+    this.demandGoodsTwoEl.find('img').attr(
+      'src',
+      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
+    )
+    this.demandGoodsThreeEl.find('img').attr(
+      'src',
+      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
+    )
+    this.demandGoodsFourEl.find('img').attr(
+      'src',
+      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
+    )
+    this.demandGoodsFiveEl.find('img').attr(
+      'src',
+      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
+    )
   }
   setAllDemandGoodsPosition() {
     this.setDemandGoodsPosition(this.city1, this.demandGoodsOneEl)
@@ -350,6 +387,9 @@ class Game {
     this.goods1El.css('background-image', `url(./assets/images/goods_${this.goods1El.data('goods')}_off@2x.png)`)
     this.goods2El.css('background-image', `url(./assets/images/goods_${this.goods2El.data('goods')}_off@2x.png)`)
     this.goods3El.css('background-image', `url(./assets/images/goods_${this.goods3El.data('goods')}_off@2x.png)`)
+    this.btnOneEl.hide()
+    this.btnTwoEl.hide()
+    this.btnThreeEl.hide()
   }
 }
 
