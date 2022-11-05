@@ -46,7 +46,7 @@ class Game {
   countdownEl = null
   loadingEl = null
   // arguments
-  dwellTime = 1_000
+  dwellTime = 3_000
   countdown = 10
   start = false
   constructor() {
@@ -72,23 +72,43 @@ class Game {
     this.countdownEl = $('#countdown')
     this.loadingEl = $('#loading')
 
+    const makeVisibleFn = () => {
+      let i = 0
+      return () => {
+        const goodsMeshes = [
+          this.goods1,
+          this.goods2,
+          this.goods3,
+        ]
+        if (i === goodsMeshes.length) {
+          return
+        }
+        goodsMeshes[i++].visible = true
+      }
+    }
+
+    const visible = makeVisibleFn()
+
     this.btn1El.on('click', () => {
       const goods = this.goods1El.data('goods')
       this.goods3.material.map = this.goods2.material.map
       this.goods2.material.map = this.goods1.material.map
       this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
+      visible()
     })
     this.btn2El.on('click', () => {
       const goods = this.goods2El.data('goods')
       this.goods3.material.map = this.goods2.material.map
       this.goods2.material.map = this.goods1.material.map
       this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
+      visible()
     })
     this.btn3El.on('click', () => {
       const goods = this.goods3El.data('goods')
       this.goods3.material.map = this.goods2.material.map
       this.goods2.material.map = this.goods1.material.map
       this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
+      visible()
     })
   }
   initRenderer() {
@@ -119,8 +139,8 @@ class Game {
     controls.target.set(0, 1, 0);
     controls.update();
     controls.enablePan = false;
-    // controls.enableZoom = false;
-    // controls.enableRotate = false;
+    controls.enableZoom = false;
+    controls.enableRotate = false;
     controls.enableDamping = true;
   }
   initEnvironment() {
@@ -146,15 +166,15 @@ class Game {
       model.children.forEach(child => {
         if (child.name === 'locomotive-wagon-western1') {
           this.western1 = child
-          this.goods1 = this.makeGoods(child, 'food')
+          this.goods1 = this.makeGoods(child)
         }
         if (child.name === 'locomotive-wagon-western2') {
           this.western2 = child
-          this.goods2 = this.makeGoods(child, 'display')
+          this.goods2 = this.makeGoods(child)
         }
         if (child.name === 'locomotive-wagon-western3') {
           this.western3 = child
-          this.goods3 = this.makeGoods(child, 'wood');
+          this.goods3 = this.makeGoods(child);
         }
       })
 
@@ -178,9 +198,9 @@ class Game {
     })
   }
   arrival() {
-    this.goods1.visible = true;
-    this.goods2.visible = true;
-    this.goods3.visible = true;
+    // this.goods1.visible = true;
+    // this.goods2.visible = true;
+    // this.goods3.visible = true;
     this.btn1El.show()
     this.btn2El.show()
     this.btn3El.show()
@@ -195,13 +215,13 @@ class Game {
     this.btn3El.hide()
     this.disableGoods()
   }
-  makeGoods(containerMesh, goodsName) {
+  makeGoods(containerMesh) {
     const geometry = new THREE.BoxGeometry(
       this.goodsSize,
       this.goodsSize,
       this.goodsSize);
     const material = new THREE.MeshBasicMaterial({
-      map: new THREE.TextureLoader().load(`./assets/images/${goodsName}.png`)
+      map: null
     });
     const goods = new THREE.Mesh(geometry, material);
     var { x, y, z } = containerMesh.position;
@@ -209,6 +229,7 @@ class Game {
     goods.position.y = y * this.modelScale + 0.22
     goods.position.z = z * this.modelScale
     containerMesh.children.push(goods)
+    goods.visible = false
     return goods;
   }
   autoScale() {
