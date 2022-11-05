@@ -170,9 +170,9 @@ class Game {
   }
   autoScale() {
     window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / this.height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, this.height);
+      this.camera.aspect = window.innerWidth / this.height;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(window.innerWidth, this.height);
     }, false);
   }
   animate() {
