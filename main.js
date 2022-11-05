@@ -35,7 +35,7 @@ class Game {
       price: 35
     },
     'cotton': {
-
+      price: 30
     },
     'cpu': {
       price: 80
@@ -466,6 +466,7 @@ class Game {
           this.neededGoodsEls[idx].hide()
           const money = this.allGoods[goods].price
           this.accountBalance += money
+          console.log(money, goods);
           this.message.show(`交易成功！+${money}`, 'success')
           this.updateAccountBalance()
         }
