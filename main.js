@@ -51,17 +51,11 @@ class Game {
   countdown = 3
   start = false
   accountBalance = 1000
-  city1 = null
-  city2 = null
-  city3 = null
-  city4 = null
-  city5 = null
-  demandGoodsOneEl = $("#demand-goods-one")
-  demandGoodsTwoEl = $("#demand-goods-two")
-  demandGoodsThreeEl = $("#demand-goods-three")
-  demandGoodsFourEl = $("#demand-goods-four")
-  demandGoodsFiveEl = $("#demand-goods-five")
-  accountBalanceEl = $("#account-balance")
+  accountBalanceEl = null
+  cityMeshes = []
+  neededGoodsEls = null
+  loadedGoods = []
+  neededGoods = []
   constructor() {
     this.initCanvas();
     this.initUI();
@@ -85,6 +79,14 @@ class Game {
     this.countdownEl = $('#countdown')
     this.loadingEl = $('#loading')
     this.msgEl = $('#msg')
+    this.neededGoodsEls = [
+      $("#needed-goods-one"),
+      $("#needed-goods-two"),
+      $("#needed-goods-three"),
+      $("#needed-goods-four"),
+      $("#needed-goods-five")
+    ]
+    this.accountBalanceEl = $('#account-balance')
 
     const makeVisibleFn = () => {
       let i = 0
@@ -170,19 +172,19 @@ class Game {
       model.children.forEach(child => {
         console.log(child.name);
         if (child.name === 'castle_T1') {
-          this.city1 = child
+          this.cityMeshes[0] = child
         }
         if (child.name === 'castle_T2') {
-          this.city2 = child
+          this.cityMeshes[1] = child
         }
         if (child.name === 'castle_T3') {
-          this.city3 = child
+          this.cityMeshes[2] = child
         }
         if (child.name === 'castle_T4') {
-          this.city4 = child
+          this.cityMeshes[3] = child
         }
         if (child.name === 'castle_T5') {
-          this.city5 = child
+          this.cityMeshes[4] = child
         }
       })
       this.scene.add(model);
@@ -222,7 +224,7 @@ class Game {
     this.btnTwoEl.show()
     this.btnThreeEl.show()
     this.randomGoods()
-    this.makeDemandGoods()
+    this.makeNeededGoods()
     const profit = this.settlement()
     if (profit > 0) {
       this.msgEl.text(`本次盈利！+${profit}￥`)
@@ -304,7 +306,7 @@ class Game {
         this.start = true
 
         this.randomGoods()
-        this.makeDemandGoods()
+        this.makeNeededGoods()
         setTimeout(this.trainAnimationPlay.bind(this), this.dwellTime)
 
         this.animate()
@@ -327,34 +329,26 @@ class Game {
     this.goods2El.data('goods', goodsArr[1])
     this.goods3El.data('goods', goodsArr[2])
   }
-  makeDemandGoods() {
-    this.demandGoodsOneEl.find('img').attr(
-      'src',
-      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
-    )
-    this.demandGoodsTwoEl.find('img').attr(
-      'src',
-      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
-    )
-    this.demandGoodsThreeEl.find('img').attr(
-      'src',
-      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
-    )
-    this.demandGoodsFourEl.find('img').attr(
-      'src',
-      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
-    )
-    this.demandGoodsFiveEl.find('img').attr(
-      'src',
-      `./assets/images/goods_${this.goods[Math.floor(Math.random() * this.goods.length)]}_on@2x.png`
-    )
+  makeNeededGoods() {
+    this.neededGoods = [
+      this.goods[Math.floor(Math.random() * this.goods.length)],
+      this.goods[Math.floor(Math.random() * this.goods.length)],
+      this.goods[Math.floor(Math.random() * this.goods.length)],
+      this.goods[Math.floor(Math.random() * this.goods.length)],
+      this.goods[Math.floor(Math.random() * this.goods.length)]
+    ]
+
+    this.neededGoods.forEach((goods, idx) => {
+      this.neededGoodsEls[idx].find('img').attr(
+        'src',
+        `./assets/images/goods_${goods}_on@2x.png`
+      )
+    })
   }
   setAllDemandGoodsPosition() {
-    this.setDemandGoodsPosition(this.city1, this.demandGoodsOneEl)
-    this.setDemandGoodsPosition(this.city2, this.demandGoodsTwoEl)
-    this.setDemandGoodsPosition(this.city3, this.demandGoodsThreeEl)
-    this.setDemandGoodsPosition(this.city4, this.demandGoodsFourEl)
-    this.setDemandGoodsPosition(this.city5, this.demandGoodsFiveEl)
+    this.neededGoodsEls.forEach((el, idx) => {
+      this.setDemandGoodsPosition(this.cityMeshes[idx], el)
+    })
   }
   setDemandGoodsPosition(city, goodsEl) {
     const vector = new THREE.Vector3(
