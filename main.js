@@ -220,17 +220,20 @@ class Game {
       this.msgEl.text(`本次亏损！${profit}￥`)
       this.msgEl.css('color', '#FF001E')
     }
+    this.activeGoodsControl()
     this.msgEl.css('opacity', '1')
+    setTimeout(() => {
+      this.msgEl.css('opacity', '0')
+    }, 1_000)
     this.accountBalanceEl.text(`${this.accountBalance}￥`)
-
+    this.refreshEl.css('filter', 'none')
     this.loadedGoods = []
     this.goodsMeshRenderer()
   }
   departure() {
-    // this.goodsMeshes.forEach(goodsMesh => goodsMesh.visible = false)
     this.btnEls.forEach(btnEl => btnEl.hide())
     this.disableGoodsControl()
-    this.msgEl.css('opacity', '0')
+    this.refreshEl.css('filter', 'grayscale(100%)')
   }
   settlement() {
     // 每次消耗燃料 -50
