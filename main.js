@@ -4,6 +4,7 @@ import { GLTFLoader } from 'GLTFLoader'
 import { RoomEnvironment } from "RoomEnvironment"
 
 class Game {
+  // three arguments
   renderer = null;
   scene = null;
   camera = null;
@@ -12,7 +13,6 @@ class Game {
   trainMixer = null;
   clock = new THREE.Clock();
   railway = null;
-  start = false
   trainAnimation = null
   goodsMeshes = []
   height = window.innerHeight * 0.8
@@ -59,19 +59,21 @@ class Game {
   refreshEl = null
   accountBalanceEl = null
   neededGoodsEls = []
+  message = new Message()
   // arguments
   dwellTime = 5_000
   countdown = 10
   start = false
   accountBalance = 1000
   energyConsumptionMoney = -50
+  carryPrice = -10
+  start = false
   // meshes
   cityMeshes = []
   cabinMeshes = []
   loadedGoods = [null, null, null]
   neededGoods = []
   producedGoods = []
-  message = new Message()
   constructor() {
     this.initCanvas();
     this.initUI();
@@ -115,6 +117,10 @@ class Game {
         if (this.producedGoods[idx].loaded) {
           this.loadedGoods[this.producedGoods[idx].cabin] = null
           this.producedGoods[idx].loaded = false
+
+          this.accountBalance += this.carryPrice
+          this.message.show(`卸载成功！${this.carryPrice}`, 'error')
+          this.updateAccountBalance()
         }
         // 选择货物
         else {
@@ -124,6 +130,10 @@ class Game {
               this.loadedGoods[i] = goods
               this.producedGoods[idx].cabin = i
               this.producedGoods[idx].loaded = true
+
+              this.accountBalance += this.carryPrice
+              this.message.show(`搬运成功！${this.carryPrice}`, 'error')
+              this.updateAccountBalance()
               break;
             }
           }
@@ -466,7 +476,6 @@ class Game {
           this.neededGoodsEls[idx].hide()
           const money = this.allGoods[goods].price
           this.accountBalance += money
-          console.log(money, goods);
           this.message.show(`交易成功！+${money}`, 'success')
           this.updateAccountBalance()
         }
