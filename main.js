@@ -18,25 +18,44 @@ class Game {
   height = window.innerHeight * 0.8
   modelScale = 0.0017
   goodsSize = 0.2
-  goods = [
-    'meat',
-    'iron',
-    'coal',
-    'oil',
-    'fish',
-    'cotton',
-    'cpu',
-    'radish',
-    'wood',
-    'gpu'
-  ]
+  allGoods = {
+    'meat': {
+      price: 40
+    },
+    'iron': {
+      price: 50
+    },
+    'coal': {
+      price: 60
+    },
+    'oil': {
+      price: 70
+    },
+    'fish': {
+      price: 35
+    },
+    'cotton': {
+
+    },
+    'cpu': {
+      price: 80
+    },
+    'radish': {
+      price: 15
+    },
+    'wood': {
+      price: 20
+    },
+    'gpu': {
+      price: 80
+    }
+  }
   materials = {}
   // ui elements
   btnEls = []
   goodsEls = []
   countdownEl = null
   loadingEl = null
-  msgEl = null
   refreshEl = null
   accountBalanceEl = null
   neededGoodsEls = []
@@ -45,12 +64,14 @@ class Game {
   countdown = 10
   start = false
   accountBalance = 1000
+  energyConsumptionMoney = -50
   // meshes
   cityMeshes = []
   cabinMeshes = []
   loadedGoods = [null, null, null]
   neededGoods = []
   producedGoods = []
+  message = new Message()
   constructor() {
     this.initCanvas();
     this.initUI();
@@ -78,7 +99,6 @@ class Game {
     ]
     this.countdownEl = $('#countdown')
     this.loadingEl = $('#loading')
-    this.msgEl = $('#msg')
     this.neededGoodsEls = [
       $("#needed-goods-one"),
       $("#needed-goods-two"),
@@ -153,7 +173,7 @@ class Game {
   }
   initMaterials() {
     const loader = new THREE.TextureLoader();
-    this.goods.forEach(goods => {
+    Object.keys(this.allGoods).forEach(goods => {
       loader.load(`./assets/images/goods_${goods}_on@3x.png`, (texture) => {
         texture.needsUpdate = true
         this.materials[goods] = new THREE.MeshBasicMaterial({
@@ -223,41 +243,25 @@ class Game {
     })
   }
   arrival() {
-    this.btnEls.forEach(btnEl => btnEl.show())
     this.randomGoods()
     this.makeNeededGoods()
-    const profit = this.settlement()
-    if (profit > 0) {
-      this.msgEl.text(`本次盈利！+${profit}￥`)
-      this.msgEl.css('color', '#C0FF00')
-    } else if (profit === 0) {
-      this.msgEl.text(`本次没有获利！`)
-      this.msgEl.css('color', 'white')
-    } else {
-      this.msgEl.text(`本次亏损！${profit}￥`)
-      this.msgEl.css('color', '#FF001E')
-    }
+    this.updateButton()
+    this.btnEls.forEach(btnEl => btnEl.show())
     this.activeGoodsControl()
-    this.msgEl.css('opacity', '1')
-    setTimeout(() => {
-      this.msgEl.css('opacity', '0')
-    }, 1_000)
-    this.accountBalanceEl.text(`${this.accountBalance}￥`)
     this.refreshEl.css('filter', 'none')
-    this.loadedGoods = []
+    this.loadedGoods = [null, null, null]
     this.goodsMeshRenderer()
+    this.neededGoodsEls.forEach(neededGoodsEl => neededGoodsEl.show())
   }
   departure() {
     this.btnEls.forEach(btnEl => btnEl.hide())
     this.disableGoodsControl()
     this.refreshEl.css('filter', 'grayscale(100%)')
-  }
-  settlement() {
-    // 每次消耗燃料 -50
-    // 每卖出一件商品 +50
-    let res = -100
-    this.accountBalance += res
-    return res
+    this.trade()
+
+    this.accountBalance += this.energyConsumptionMoney
+    this.message.show(`消耗能源！${this.energyConsumptionMoney}`, 'error')
+    this.updateAccountBalance()
   }
   autoScale() {
     window.addEventListener('resize', () => {
@@ -303,7 +307,7 @@ class Game {
   }
   randomGoods() {
     for (let i = 0; i < 3; i++) {
-      let goods = this.goods[Math.floor(Math.random() * this.goods.length)]
+      let goods = Object.keys(this.allGoods)[Math.floor(Math.random() * Object.keys(this.allGoods).length)]
       this.producedGoods[i] = {
         name: goods,
         loaded: false
@@ -318,12 +322,14 @@ class Game {
     }
   }
   makeNeededGoods() {
+    const len = Object.keys(this.allGoods).length
+    const allGoods = Object.keys(this.allGoods)
     this.neededGoods = [
-      this.goods[Math.floor(Math.random() * this.goods.length)],
-      this.goods[Math.floor(Math.random() * this.goods.length)],
-      this.goods[Math.floor(Math.random() * this.goods.length)],
-      this.goods[Math.floor(Math.random() * this.goods.length)],
-      this.goods[Math.floor(Math.random() * this.goods.length)]
+      allGoods[Math.floor(Math.random() * len)],
+      allGoods[Math.floor(Math.random() * len)],
+      allGoods[Math.floor(Math.random() * len)],
+      allGoods[Math.floor(Math.random() * len)],
+      allGoods[Math.floor(Math.random() * len)],
     ]
 
     this.neededGoods.forEach((goods, idx) => {
@@ -412,10 +418,16 @@ class Game {
           'background-image',
           'url("./assets/images/reselect-btn.png")'
         )
-        this.btnEls[idx].hover(() => {
-          this.btnEls[idx]
-            .css('background-image', 'url("./assets/images/reselect-btn-hover.png")')
-        })
+        this.btnEls[idx].hover(
+          () => {
+            this.btnEls[idx]
+              .css('background-image', 'url("./assets/images/reselect-btn-hover.png")')
+          },
+          () => {
+            this.btnEls[idx]
+              .css('background-image', 'url("./assets/images/reselect-btn.png")')
+          }
+        )
         this.btnEls[idx].text('卸货')
       } else {
         this.goodsEls[idx].css(
@@ -426,13 +438,69 @@ class Game {
           'background-image',
           'url("./assets/images/btn.png")'
         )
-        this.btnEls[idx].hover(() => {
-          this.btnEls[idx]
-            .css('background-image', 'url("./assets/images/btn-hover.png")')
-        })
+        this.btnEls[idx].hover(
+          () => {
+            this.btnEls[idx]
+              .css('background-image', 'url("./assets/images/btn-hover.png")')
+          },
+          () => {
+            this.btnEls[idx]
+              .css('background-image', 'url("./assets/images/btn.png")')
+          },
+        )
         this.btnEls[idx].text('装货')
       }
     })
+  }
+  trade() {
+    const arrivalTime = [
+      5, 7, 9, 10, 12
+    ]
+    arrivalTime.forEach((time, idx) => {
+      setTimeout(() => {
+        const successIdx = this.loadedGoods.findIndex(goods => goods === this.neededGoods[idx])
+        if (successIdx > -1) {
+          const goods = this.loadedGoods[successIdx]
+          this.goodsMeshes[successIdx].visible = false
+          this.loadedGoods[successIdx] = null
+          this.neededGoodsEls[idx].hide()
+          const money = this.allGoods[goods].price
+          this.accountBalance += money
+          this.message.show(`交易成功！+${money}`, 'success')
+          this.updateAccountBalance()
+        }
+      }, time * 1000)
+    })
+  }
+  updateAccountBalance() {
+    this.accountBalanceEl.text(`${this.accountBalance}￥`)
+  }
+}
+
+class Message {
+  duration = 1600
+  els = []
+
+  show(text, type = 'info', duration = this.duration) {
+    const colors = {
+      success: '#C0FF00',
+      error: '#FF001E',
+      info: '#FFFFFF'
+    }
+    const color = colors[type]
+    const el = $(`<div
+    id="msg"
+    class="text-[2vw] text-white fixed left-[18vw] bottom-[24vh] font-[huakang] -translate-x-1/2 text-[${color}] -translate-y-[${this.els.length * 6}vh]"
+    style="display: none;">${text}</div>`)
+    this.els.push(el)
+    $('body').append(el)
+    el.fadeIn()
+    const idx = this.els.length - 1
+    setTimeout(() => {
+      el.fadeOut()
+      this.els.splice(idx, 1)
+      el.remove()
+    }, duration)
   }
 }
 
