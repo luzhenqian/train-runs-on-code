@@ -14,13 +14,8 @@ class Game {
   railway = null;
   train = [];
   start = false
-  trainAnimation = null;
-  cabin1 = null
-  cabin2 = null
-  cabin3 = null
-  goods1 = null
-  goods2 = null
-  goods3 = null
+  trainAnimation = null
+  goodsMeshes = []
   height = window.innerHeight * 0.8
   modelScale = 0.0017
   goodsSize = 0.2
@@ -37,12 +32,8 @@ class Game {
     'gpu'
   ]
   // ui elements
-  btnOneEl = null
-  btnTwoEl = null
-  btnThreeEl = null
-  goods1El = null
-  goods2El = null
-  goods3El = null
+  btnEls = []
+  goodsEls = []
   countdownEl = null
   loadingEl = null
   msgEl = null
@@ -56,6 +47,7 @@ class Game {
   neededGoodsEls = null
   loadedGoods = []
   neededGoods = []
+  producedGoods = []
   constructor() {
     this.initCanvas();
     this.initUI();
@@ -70,12 +62,16 @@ class Game {
     this.initEnvironment()
   }
   initUI() {
-    this.btnOneEl = $('#btn1')
-    this.btnTwoEl = $('#btn2')
-    this.btnThreeEl = $('#btn3')
-    this.goods1El = $('#goods1')
-    this.goods2El = $('#goods2')
-    this.goods3El = $('#goods3')
+    this.btnEls = [
+      $('#btn-one'),
+      $('#btn-two'),
+      $('#btn-three'),
+    ]
+    this.goodsEls = [
+      $('#goods-one'),
+      $('#goods-two'),
+      $('#goods-three'),
+    ]
     this.countdownEl = $('#countdown')
     this.loadingEl = $('#loading')
     this.msgEl = $('#msg')
@@ -91,40 +87,23 @@ class Game {
     const makeVisibleFn = () => {
       let i = 0
       return () => {
-        const goodsMeshes = [
-          this.goods1,
-          this.goods2,
-          this.goods3,
-        ]
-        if (i === goodsMeshes.length) {
+        if (i === this.goodsMeshes.length) {
           i = 0
         }
-        goodsMeshes[i++].visible = true
+        this.goodsMeshes[i++].visible = true
       }
     }
 
     const visible = makeVisibleFn()
 
-    this.btnOneEl.on('click', () => {
-      const goods = this.goods1El.data('goods')
-      this.goods3.material.map = this.goods2.material.map
-      this.goods2.material.map = this.goods1.material.map
-      this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
-      visible()
-    })
-    this.btnTwoEl.on('click', () => {
-      const goods = this.goods2El.data('goods')
-      this.goods3.material.map = this.goods2.material.map
-      this.goods2.material.map = this.goods1.material.map
-      this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
-      visible()
-    })
-    this.btnThreeEl.on('click', () => {
-      const goods = this.goods3El.data('goods')
-      this.goods3.material.map = this.goods2.material.map
-      this.goods2.material.map = this.goods1.material.map
-      this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
-      visible()
+    this.btnEls.forEach((btnEl, idx) => {
+      btnEl.on('click', () => {
+        const goods = this.producedGoods[idx]
+        this.goodsMeshes[2].material.map = this.goodsMeshes[1].material.map
+        this.goodsMeshes[1].material.map = this.goodsMeshes[0].material.map
+        this.goodsMeshes[0].material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
+        visible()
+      })
     })
   }
   initRenderer() {
@@ -200,15 +179,15 @@ class Game {
       model.children.forEach(child => {
         if (child.name === 'locomotive-wagon-western1') {
           this.western1 = child
-          this.goods1 = this.makeGoods(child)
+          this.goodsMeshes[0] = this.makeGoods(child)
         }
         if (child.name === 'locomotive-wagon-western2') {
           this.western2 = child
-          this.goods2 = this.makeGoods(child)
+          this.goodsMeshes[1] = this.makeGoods(child)
         }
         if (child.name === 'locomotive-wagon-western3') {
           this.western3 = child
-          this.goods3 = this.makeGoods(child);
+          this.goodsMeshes[2] = this.makeGoods(child);
         }
       })
 
@@ -220,9 +199,7 @@ class Game {
     })
   }
   arrival() {
-    this.btnOneEl.show()
-    this.btnTwoEl.show()
-    this.btnThreeEl.show()
+    this.btnEls.forEach(btnEl => btnEl.show())
     this.randomGoods()
     this.makeNeededGoods()
     const profit = this.settlement()
@@ -240,12 +217,8 @@ class Game {
     this.accountBalanceEl.text(`${this.accountBalance}￥`)
   }
   departure() {
-    this.goods1.visible = false;
-    this.goods2.visible = false;
-    this.goods3.visible = false;
-    this.btnOneEl.hide()
-    this.btnTwoEl.hide()
-    this.btnThreeEl.hide()
+    this.goodsMeshes.forEach(goodsMesh => goodsMesh.visible = false)
+    this.btnEls.forEach(btnEl => btnEl.hide())
     this.disableGoods()
     this.msgEl.css('opacity', '0')
   }
@@ -314,20 +287,20 @@ class Game {
     }, 1_000)
   }
   randomGoods() {
-    const goodsArr = []
     for (let i = 0; i < 3; i++) {
       let goods = this.goods[Math.floor(Math.random() * this.goods.length)]
-      for (; goodsArr.includes(goods);) {
+      for (; this.producedGoods.includes(goods);) {
         goods = this.goods[Math.floor(Math.random() * this.goods.length)]
       }
-      goodsArr.push(goods)
+      this.producedGoods[i] = goods
+      this.goodsEls[i].css(
+        'background-image',
+        `url(./assets/images/goods_${goods}_on@2x.png)`)
+      this.goodsEls[i].data(
+        'goods',
+        goods
+      )
     }
-    this.goods1El.css('background-image', `url(./assets/images/goods_${goodsArr[0]}_on@2x.png)`)
-    this.goods2El.css('background-image', `url(./assets/images/goods_${goodsArr[1]}_on@2x.png)`)
-    this.goods3El.css('background-image', `url(./assets/images/goods_${goodsArr[2]}_on@2x.png)`)
-    this.goods1El.data('goods', goodsArr[0])
-    this.goods2El.data('goods', goodsArr[1])
-    this.goods3El.data('goods', goodsArr[2])
   }
   makeNeededGoods() {
     this.neededGoods = [
@@ -378,12 +351,15 @@ class Game {
     });
   }
   disableGoods() {
-    this.goods1El.css('background-image', `url(./assets/images/goods_${this.goods1El.data('goods')}_off@2x.png)`)
-    this.goods2El.css('background-image', `url(./assets/images/goods_${this.goods2El.data('goods')}_off@2x.png)`)
-    this.goods3El.css('background-image', `url(./assets/images/goods_${this.goods3El.data('goods')}_off@2x.png)`)
-    this.btnOneEl.hide()
-    this.btnTwoEl.hide()
-    this.btnThreeEl.hide()
+    this.goodsEls.forEach((goodsEl, idx) => {
+      goodsEl.css(
+        'background-image',
+        `url(./assets/images/goods_${this.producedGoods[idx]}_off@2x.png)`
+      )
+    })
+    this.btnEls.forEach((btnEl) => {
+      btnEl.hide()
+    })
   }
 }
 
