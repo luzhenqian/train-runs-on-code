@@ -22,7 +22,7 @@ class Game {
   goods2 = null
   goods3 = null
   height = window.innerHeight * 0.8
-  modelScale = 0.0015
+  modelScale = 0.0017
   goodsSize = 0.2
   goods = [
     'meat',
@@ -47,8 +47,18 @@ class Game {
   loadingEl = null
   // arguments
   dwellTime = 3_000
-  countdown = 10
+  countdown = 3
   start = false
+  city1 = null
+  city2 = null
+  city3 = null
+  city4 = null
+  city5 = null
+  demandGoodsOneEl = $("#demand-goods-one")
+  demandGoodsTwoEl = $("#demand-goods-two")
+  demandGoodsThreeEl = $("#demand-goods-three")
+  demandGoodsFourEl = $("#demand-goods-four")
+  demandGoodsFiveEl = $("#demand-goods-five")
   constructor() {
     this.initCanvas();
     this.initUI();
@@ -139,8 +149,8 @@ class Game {
     controls.target.set(0, 1, 0);
     controls.update();
     controls.enablePan = false;
-    controls.enableZoom = false;
-    controls.enableRotate = false;
+    // controls.enableZoom = false;
+    // controls.enableRotate = false;
     controls.enableDamping = true;
   }
   initEnvironment() {
@@ -153,6 +163,24 @@ class Game {
     loader.load('./assets/model/terrain.gltf', (gltf) => {
       const model = gltf.scene;
       model.scale.set(this.modelScale, this.modelScale, this.modelScale);
+      model.children.forEach(child => {
+        console.log(child.name);
+        if (child.name === 'castle_T1') {
+          this.city1 = child
+        }
+        if (child.name === 'castle_T2') {
+          this.city2 = child
+        }
+        if (child.name === 'castle_T3') {
+          this.city3 = child
+        }
+        if (child.name === 'castle_T4') {
+          this.city4 = child
+        }
+        if (child.name === 'castle_T5') {
+          this.city5 = child
+        }
+      })
       this.scene.add(model);
 
       const terrainMixer = this.terrainMixer = new THREE.AnimationMixer(model);
@@ -181,30 +209,16 @@ class Game {
       this.scene.add(model);
 
       // Create a mixer
-      const trainMixer = this.terrainMixer = new THREE.AnimationMixer(model);
-      const trainAnimation = trainMixer.clipAction(gltf.animations[0])
-      setTimeout(() => {
-        trainAnimation.play();
-        this.departure()
-      }, this.dwellTime)
-      trainMixer.addEventListener('loop', (e) => {
-        trainAnimation.stop();
-        this.arrival()
-        setTimeout(() => {
-          trainAnimation.play();
-          this.departure()
-        }, this.dwellTime)
-      });
+      this.trainMixer = new THREE.AnimationMixer(model);
+      this.trainAnimation = this.trainMixer.clipAction(gltf.animations[0])
     })
   }
   arrival() {
-    // this.goods1.visible = true;
-    // this.goods2.visible = true;
-    // this.goods3.visible = true;
     this.btn1El.show()
     this.btn2El.show()
     this.btn3El.show()
     this.randomGoods()
+    this.makeDemandGoods()
   }
   departure() {
     this.goods1.visible = false;
@@ -244,6 +258,7 @@ class Game {
     const delta = this.clock.getDelta();
     if (this.terrainMixer) {
       this.terrainMixer.update(delta);
+      this.setAllDemandGoodsPosition()
     }
     if (this.start && this.trainMixer) {
       this.trainMixer.update(delta);
@@ -261,11 +276,14 @@ class Game {
         this.loadingEl.hide()
         clearInterval(timer)
         this.start = true
+
+        this.randomGoods()
+        this.makeDemandGoods()
+        this.trainAnimationPlay()
       }
     }, 1_000)
 
     this.animate()
-    this.randomGoods()
   }
   randomGoods() {
     const goodsArr = []
@@ -282,6 +300,51 @@ class Game {
     this.goods1El.data('goods', goodsArr[0])
     this.goods2El.data('goods', goodsArr[1])
     this.goods3El.data('goods', goodsArr[2])
+  }
+  makeDemandGoods() {
+    // const geometry = new THREE.BoxGeometry(1, 1, 1);
+    // const material = new THREE.MeshBasicMaterial({ color: 0xf0f04f })
+    // const cube = new THREE.Mesh(geometry, material);
+    // cube.position.set(
+    //   this.city1.position.x * this.modelScale,
+    //   this.city1.position.y * this.modelScale,
+    //   this.city1.position.z * this.modelScale,
+    // )
+    // this.scene.add(cube)
+  }
+  setAllDemandGoodsPosition() {
+    this.setDemandGoodsPosition(this.city1, this.demandGoodsOneEl)
+    this.setDemandGoodsPosition(this.city2, this.demandGoodsTwoEl)
+    this.setDemandGoodsPosition(this.city3, this.demandGoodsThreeEl)
+    this.setDemandGoodsPosition(this.city4, this.demandGoodsFourEl)
+    this.setDemandGoodsPosition(this.city5, this.demandGoodsFiveEl)
+  }
+  setDemandGoodsPosition(city, goodsEl) {
+    const vector = new THREE.Vector3(
+      city.position.x * this.modelScale,
+      city.position.y * this.modelScale,
+      city.position.z * this.modelScale
+    ).project(this.camera)
+    let halfWidth = window.innerWidth / 2;
+    let halfHeight = this.height / 2;
+    let left = vector.x * halfWidth + halfWidth
+    let top = -vector.y * halfHeight + halfHeight
+    goodsEl.css({
+      left,
+      top
+    });
+  }
+  trainAnimationPlay() {
+    this.trainAnimation.play();
+    this.departure()
+    this.trainMixer.addEventListener('loop', (e) => {
+      this.trainAnimation.stop();
+      this.arrival()
+      setTimeout(() => {
+        this.trainAnimation.play();
+        this.departure()
+      }, this.dwellTime)
+    });
   }
   disableGoods() {
     this.goods1El.css('background-image', `url(./assets/images/goods_${this.goods1El.data('goods')}_off@2x.png)`)
