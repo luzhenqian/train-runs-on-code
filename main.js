@@ -48,7 +48,7 @@ class Game {
   // meshes
   cityMeshes = []
   cabinMeshes = []
-  loadedGoods = []
+  loadedGoods = [null, null, null]
   neededGoods = []
   producedGoods = []
   constructor() {
@@ -91,8 +91,25 @@ class Game {
 
     this.btnEls.forEach((btnEl, idx) => {
       btnEl.on('click', () => {
-        const goods = this.producedGoods[idx]
-        this.loadedGoods.unshift(goods)
+        // 卸载货物
+        if (this.producedGoods[idx].loaded) {
+          this.loadedGoods[this.producedGoods[idx].cabin] = null
+          this.producedGoods[idx].loaded = false
+        }
+        // 选择货物
+        else {
+          const goods = this.producedGoods[idx].name
+          for (let i = 0; i < this.loadedGoods.length; i++) {
+            if (!!!this.loadedGoods[i]) {
+              this.loadedGoods[i] = goods
+              this.producedGoods[idx].cabin = i
+              this.producedGoods[idx].loaded = true
+              break;
+            }
+          }
+        }
+
+        this.updateButton()
         this.goodsMeshRenderer()
       })
     })
@@ -287,10 +304,10 @@ class Game {
   randomGoods() {
     for (let i = 0; i < 3; i++) {
       let goods = this.goods[Math.floor(Math.random() * this.goods.length)]
-      for (; this.producedGoods.includes(goods);) {
-        goods = this.goods[Math.floor(Math.random() * this.goods.length)]
+      this.producedGoods[i] = {
+        name: goods,
+        loaded: false
       }
-      this.producedGoods[i] = goods
       this.goodsEls[i].css(
         'background-image',
         `url(./assets/images/goods_${goods}_on@2x.png)`)
@@ -352,7 +369,7 @@ class Game {
     this.goodsEls.forEach((goodsEl, idx) => {
       goodsEl.css(
         'background-image',
-        `url(./assets/images/goods_${this.producedGoods[idx] || 'gpu'}_off@2x.png)`
+        `url(./assets/images/goods_${this.producedGoods[idx]?.name || 'gpu'}_off@2x.png)`
       )
     })
     this.btnEls.forEach((btnEl) => {
@@ -382,6 +399,39 @@ class Game {
       }
       goodsMesh.material = this.materials[goods]
       goodsMesh.visible = true
+    })
+  }
+  updateButton() {
+    this.producedGoods.forEach((goods, idx) => {
+      if (goods.loaded) {
+        this.goodsEls[idx].css(
+          'background-image',
+          `url(./assets/images/goods_${goods.name}_off@2x.png)`
+        )
+        this.btnEls[idx].css(
+          'background-image',
+          'url("./assets/images/reselect-btn.png")'
+        )
+        this.btnEls[idx].hover(() => {
+          this.btnEls[idx]
+            .css('background-image', 'url("./assets/images/reselect-btn-hover.png")')
+        })
+        this.btnEls[idx].text('卸货')
+      } else {
+        this.goodsEls[idx].css(
+          'background-image',
+          `url(./assets/images/goods_${goods.name}_on@2x.png)`
+        )
+        this.btnEls[idx].css(
+          'background-image',
+          'url("./assets/images/btn.png")'
+        )
+        this.btnEls[idx].hover(() => {
+          this.btnEls[idx]
+            .css('background-image', 'url("./assets/images/btn-hover.png")')
+        })
+        this.btnEls[idx].text('装货')
+      }
     })
   }
 }
