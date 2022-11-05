@@ -23,15 +23,31 @@ class Game {
   goods3 = null
   height = window.innerHeight * 0.8
   modelScale = 0.0015
+  goodsSize = 0.2
+  goods = [
+    'meat',
+    'iron',
+    'coal',
+    'oil',
+    'fish',
+    'cotton',
+    'cpu',
+    'radish',
+    'wood',
+    'gpu'
+  ]
   // ui elements
-  btn1 = null
-  btn2 = null
-  btn3 = null
+  btn1El = null
+  btn2El = null
+  btn3El = null
+  goods1El = null
+  goods2El = null
+  goods3El = null
   countdownEl = null
   loadingEl = null
   // arguments
-  dwellTime = 3_000
-  countdown = 3
+  dwellTime = 1_000
+  countdown = 10
   start = false
   constructor() {
     this.initCanvas();
@@ -47,11 +63,33 @@ class Game {
     this.initEnvironment()
   }
   initUI() {
-    this.btn1 = $('#btn1')
-    this.btn2 = $('#btn2')
-    this.btn3 = $('#btn3')
+    this.btn1El = $('#btn1')
+    this.btn2El = $('#btn2')
+    this.btn3El = $('#btn3')
+    this.goods1El = $('#goods1')
+    this.goods2El = $('#goods2')
+    this.goods3El = $('#goods3')
     this.countdownEl = $('#countdown')
     this.loadingEl = $('#loading')
+
+    this.btn1El.on('click', () => {
+      const goods = this.goods1El.data('goods')
+      this.goods3.material.map = this.goods2.material.map
+      this.goods2.material.map = this.goods1.material.map
+      this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
+    })
+    this.btn2El.on('click', () => {
+      const goods = this.goods2El.data('goods')
+      this.goods3.material.map = this.goods2.material.map
+      this.goods2.material.map = this.goods1.material.map
+      this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
+    })
+    this.btn3El.on('click', () => {
+      const goods = this.goods3El.data('goods')
+      this.goods3.material.map = this.goods2.material.map
+      this.goods2.material.map = this.goods1.material.map
+      this.goods1.material.map = new THREE.TextureLoader().load(`./assets/images/goods_${goods}_on@2x.png`)
+    })
   }
   initRenderer() {
     // Create a WebGL renderer
@@ -143,27 +181,32 @@ class Game {
     this.goods1.visible = true;
     this.goods2.visible = true;
     this.goods3.visible = true;
-    this.btn1.show()
-    this.btn2.show()
-    this.btn3.show()
+    this.btn1El.show()
+    this.btn2El.show()
+    this.btn3El.show()
+    this.randomGoods()
   }
   departure() {
     this.goods1.visible = false;
     this.goods2.visible = false;
     this.goods3.visible = false;
-    this.btn1.hide()
-    this.btn2.hide()
-    this.btn3.hide()
+    this.btn1El.hide()
+    this.btn2El.hide()
+    this.btn3El.hide()
+    this.disableGoods()
   }
   makeGoods(containerMesh, goodsName) {
-    const geometry = new THREE.BoxGeometry(0.15, 0.15, 0.15);
+    const geometry = new THREE.BoxGeometry(
+      this.goodsSize,
+      this.goodsSize,
+      this.goodsSize);
     const material = new THREE.MeshBasicMaterial({
       map: new THREE.TextureLoader().load(`./assets/images/${goodsName}.png`)
     });
     const goods = new THREE.Mesh(geometry, material);
     var { x, y, z } = containerMesh.position;
-    goods.position.x = x * this.modelScale
-    goods.position.y = y * this.modelScale + 0.2
+    goods.position.x = x * this.modelScale - 0.35
+    goods.position.y = y * this.modelScale + 0.22
     goods.position.z = z * this.modelScale
     containerMesh.children.push(goods)
     return goods;
@@ -201,6 +244,28 @@ class Game {
     }, 1_000)
 
     this.animate()
+    this.randomGoods()
+  }
+  randomGoods() {
+    const goodsArr = []
+    for (let i = 0; i < 3; i++) {
+      let goods = this.goods[Math.floor(Math.random() * this.goods.length)]
+      for (; goodsArr.includes(goods);) {
+        goods = this.goods[Math.floor(Math.random() * this.goods.length)]
+      }
+      goodsArr.push(goods)
+    }
+    this.goods1El.css('background-image', `url(./assets/images/goods_${goodsArr[0]}_on@2x.png)`)
+    this.goods2El.css('background-image', `url(./assets/images/goods_${goodsArr[1]}_on@2x.png)`)
+    this.goods3El.css('background-image', `url(./assets/images/goods_${goodsArr[2]}_on@2x.png)`)
+    this.goods1El.data('goods', goodsArr[0])
+    this.goods2El.data('goods', goodsArr[1])
+    this.goods3El.data('goods', goodsArr[2])
+  }
+  disableGoods() {
+    this.goods1El.css('background-image', `url(./assets/images/goods_${this.goods1El.data('goods')}_off@2x.png)`)
+    this.goods2El.css('background-image', `url(./assets/images/goods_${this.goods2El.data('goods')}_off@2x.png)`)
+    this.goods3El.css('background-image', `url(./assets/images/goods_${this.goods3El.data('goods')}_off@2x.png)`)
   }
 }
 
