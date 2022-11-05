@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./libs/jquery@3.3.1.js"></script>
     <link rel="stylesheet" href="./styles.css" />
     <!-- <script src="./libs/require.min.js"></script> -->
   </head>
@@ -28,6 +29,7 @@
           class="bg-[url('./assets/images/wood.png')] bg-cover w-[9.6vw] aspect-[1/1]"
         ></div>
         <div
+        id="btn1"
           class="text-[1vw] md:scale-75 text-white w-[5vw] aspect-[2/1] flex justify-center items-center font-[huakang] aspect-[2/1] bg-[url('./assets/images/btn.png')] active:bg-[url('./assets/images/btn-hover.png')] bg-cover bg-center absolute bottom-0 translate-y-1/2 cursor-pointer"
         >
           装车
@@ -41,6 +43,7 @@
           class="bg-[url('./assets/images/food.png')] bg-cover w-[9.6vw] aspect-[1/1]"
         ></div>
         <div
+        id="btn2"
           class="text-[1vw] md:scale-75 text-white w-[5vw] aspect-[2/1] flex justify-center items-center font-[huakang] aspect-[2/1] bg-[url('./assets/images/btn.png')] active:bg-[url('./assets/images/btn-hover.png')] bg-cover bg-center absolute bottom-0 translate-y-1/2 cursor-pointer"
         >
           装车
@@ -54,6 +57,7 @@
           class="bg-[url('./assets/images/display.png')] bg-cover w-[9.6vw] aspect-[1/1]"
         ></div>
         <div
+        id="btn3"
           class="text-[1vw] md:scale-75 text-white w-[5vw] aspect-[2/1] flex justify-center items-center font-[huakang] aspect-[2/1] bg-[url('./assets/images/btn.png')] active:bg-[url('./assets/images/btn-hover.png')] bg-cover bg-center absolute bottom-0 translate-y-1/2 cursor-pointer"
         >
           装车
@@ -76,12 +80,11 @@
       ></div>
     </div>
 
-    <div class="flex flex-col items-center fixed top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-10">
+    <div id="loading" class="flex flex-col items-center fixed top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-10">
       <span class="text-white font-[huakang] text-[2.8vw]" >码上掘金 即将到来</span>
       <img src="./assets/images/loading.gif"></img>
-      <span class="text-white font-[huakang] text-[2.8vw]" >10s</span>
+      <span id="countdown" class="text-white font-[huakang] text-[2.8vw]" >10s</span>
     </div>
-
 
     <script
       async
