@@ -489,7 +489,7 @@ class Game {
 
 class Message {
   duration = 1600
-  els = []
+  timers = []
 
   show(text, type = 'info', duration = this.duration) {
     const colors = {
@@ -500,17 +500,17 @@ class Message {
     const color = colors[type]
     const el = $(`<div
     id="msg"
-    class="text-[2vw] text-white fixed left-[18vw] bottom-[24vh] font-[huakang] -translate-x-1/2 text-[${color}] -translate-y-[${this.els.length * 6}vh]"
+    class="text-[2vw] text-white fixed left-[18vw] bottom-[24vh] font-[huakang] -translate-x-1/2 text-[${color}] -translate-y-[${this.timers.length * 6}vh]"
     style="display: none;">${text}</div>`)
-    this.els.push(el)
     $('body').append(el)
     el.fadeIn()
-    const idx = this.els.length - 1
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       el.fadeOut()
-      this.els.splice(idx, 1)
+      const idx = this.timers.findIndex(t => t === timer)
+      this.timers.splice(idx, 1)
       el.remove()
     }, duration)
+    this.timers.push(timer)
   }
 }
 
