@@ -64,10 +64,10 @@ class Game {
   dwellTime = 10_000
   countdown = 10
   start = false
-  accountBalance = 1000
+  accountBalance = 500
   energyConsumptionMoney = -50
-  carryMoney = -10
-  refreshMoney = -50
+  carryMoney = -5
+  refreshMoney = -20
   // meshes
   cityMeshes = []
   cabinMeshes = []
@@ -109,11 +109,15 @@ class Game {
       <span class="text-white font-[huakang] text-[2.8vw]"
         >码上掘金 即将到来</span
       >
-      <img src="./assets/images/loading.gif" />
+      <img />
       <span id="countdown" class="text-white font-[huakang] text-[2.8vw]"
         >10s</span
       >
     </div>`)
+    this.loadingImage = new Image()
+    this.loadingImage.src = './assets/images/loading.gif'
+    this.loadingEl.find('img').attr('src', this.loadingImage.src);
+
     $('body').append(this.loadingEl)
     this.loadingEl.hide()
     this.countdownEl = $('#countdown')
@@ -128,7 +132,10 @@ class Game {
     this.accountBalanceEl = $('#account-balance')
     this.refreshEl = $('#refresh')
     this.refreshEl.on('click', this.refreshProducedGoods.bind(this))
-    // 绑定事件
+    console.log(    this.refreshEl.find('#refresh-money'), 's');
+    $('#refresh-money').text(`${-this.refreshMoney}￥`)
+
+    // 绑定装货/卸货事件
     this.btnEls.forEach((btnEl, idx) => {
       btnEl.on('click', () => {
         // 卸载货物
@@ -341,6 +348,7 @@ class Game {
     let countdown = this.countdown;
     this.countdownEl.text(`${countdown}s`)
     this.loadingEl.show()
+    this.loadingEl.find('img').attr('src', this.loadingImage.src);
     const timer = setInterval(() => {
       this.countdownEl.text(`${countdown -= 1}s`)
       if (countdown === 0) {
