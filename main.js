@@ -61,7 +61,7 @@ class Game {
   neededGoodsEls = []
   message = new Message()
   // arguments
-  dwellTime = 5_000
+  dwellTime = 10_000
   countdown = 10
   start = false
   accountBalance = 1000
@@ -111,7 +111,7 @@ class Game {
     ]
     this.accountBalanceEl = $('#account-balance')
     this.refreshEl = $('#refresh')
-    this.refreshEl.on('click', this.refresh.bind(this))
+    this.refreshEl.on('click', this.refreshProducedGoods.bind(this))
 
     this.btnEls.forEach((btnEl, idx) => {
       btnEl.on('click', () => {
@@ -122,7 +122,7 @@ class Game {
 
           this.accountBalance += this.carryMoney
           this.message.show(`卸载成功！${this.carryMoney}`, 'error')
-          this.updateAccountBalance()
+          this.updateAccountBalanceUI()
         }
         // 选择货物
         else {
@@ -135,14 +135,14 @@ class Game {
 
               this.accountBalance += this.carryMoney
               this.message.show(`搬运成功！${this.carryMoney}`, 'error')
-              this.updateAccountBalance()
+              this.updateAccountBalanceUI()
               break;
             }
           }
         }
 
-        this.updateButton()
-        this.goodsMeshRenderer()
+        this.updateButtonUI()
+        this.updateLoadedGoodsMesh()
       })
     })
   }
@@ -247,6 +247,8 @@ class Game {
         }
       })
 
+      this.updateLoadedGoodsMesh()
+
       this.scene.add(model);
 
       // Create a mixer
@@ -257,12 +259,12 @@ class Game {
   arrival() {
     this.makeProducedGoods()
     this.makeNeededGoods()
-    this.updateButton()
+    this.updateButtonUI()
     this.btnEls.forEach(btnEl => btnEl.show())
     this.activeGoodsControl()
     this.refreshEl.css('filter', 'none')
     this.loadedGoods = [null, null, null]
-    this.goodsMeshRenderer()
+    this.updateLoadedGoodsMesh()
     this.neededGoodsEls.forEach(neededGoodsEl => neededGoodsEl.show())
   }
   departure() {
@@ -273,7 +275,7 @@ class Game {
 
     this.accountBalance += this.energyConsumptionMoney
     this.message.show(`消耗能源！${this.energyConsumptionMoney}`, 'error')
-    this.updateAccountBalance()
+    this.updateAccountBalanceUI()
   }
   autoScale() {
     window.addEventListener('resize', () => {
@@ -410,7 +412,37 @@ class Game {
     )
     this.refreshEl.css('pointer-events', 'auto');
   }
-  goodsMeshRenderer() {
+  trade() {
+    const arrivalTime = [
+      5, 7, 9, 10, 12
+    ]
+    arrivalTime.forEach((time, idx) => {
+      setTimeout(() => {
+        const successIdx = this.loadedGoods.findIndex(goods => goods === this.neededGoods[idx])
+        if (successIdx > -1) {
+          const goods = this.loadedGoods[successIdx]
+          this.goodsMeshes[successIdx].visible = false
+          this.loadedGoods[successIdx] = null
+          this.neededGoodsEls[idx].hide()
+          const money = this.allGoods[goods].price
+          this.accountBalance += money
+          this.message.show(`交易成功！+${money}`, 'success')
+          this.updateAccountBalanceUI()
+        }
+      }, time * 1000)
+    })
+  }
+  refreshProducedGoods() {
+    this.producedGoods.forEach(goods => {
+      if (!goods.loaded) {
+        const keys = Object.keys(this.allGoods)
+        const len = keys.length
+        goods.name = keys[Math.floor(Math.random() * len)]
+      }
+    })
+    this.updateProducedGoodsUI()
+  }
+  updateLoadedGoodsMesh() {
     this.goodsMeshes.forEach((goodsMesh, idx) => {
       const goods = this.loadedGoods[idx]
       if (!goods) {
@@ -421,7 +453,7 @@ class Game {
       goodsMesh.visible = true
     })
   }
-  updateButton() {
+  updateButtonUI() {
     this.producedGoods.forEach((goods, idx) => {
       if (goods.loaded) {
         this.goodsEls[idx].css(
@@ -466,40 +498,10 @@ class Game {
       }
     })
   }
-  trade() {
-    const arrivalTime = [
-      5, 7, 9, 10, 12
-    ]
-    arrivalTime.forEach((time, idx) => {
-      setTimeout(() => {
-        const successIdx = this.loadedGoods.findIndex(goods => goods === this.neededGoods[idx])
-        if (successIdx > -1) {
-          const goods = this.loadedGoods[successIdx]
-          this.goodsMeshes[successIdx].visible = false
-          this.loadedGoods[successIdx] = null
-          this.neededGoodsEls[idx].hide()
-          const money = this.allGoods[goods].price
-          this.accountBalance += money
-          this.message.show(`交易成功！+${money}`, 'success')
-          this.updateAccountBalance()
-        }
-      }, time * 1000)
-    })
-  }
-  updateAccountBalance() {
+  updateAccountBalanceUI() {
     this.accountBalanceEl.text(`${this.accountBalance}￥`)
   }
-  refresh() {
-    this.producedGoods.forEach(goods => {
-      if (!goods.loaded) {
-        const keys = Object.keys(this.allGoods)
-        const len = keys.length
-        goods.name = keys[Math.floor(Math.random() * len)]
-      }
-    })
-    this.updateProducedGoods()
-  }
-  updateProducedGoods() {
+  updateProducedGoodsUI() {
     this.goodsEls.forEach((goodsEl, idx) => {
       goodsEl.css(
         'background-image',
@@ -508,7 +510,7 @@ class Game {
     })
     this.accountBalance += this.refreshMoney
     this.message.show(`刷新成功！${this.refreshMoney}`, 'error')
-    this.updateAccountBalance()
+    this.updateAccountBalanceUI()
   }
 }
 
