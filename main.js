@@ -77,9 +77,7 @@ class Game {
   producedGoods = []
   musics = {}
   constructor() {
-    this.initCanvas().then(() => {
-      this.play()
-    });
+    this.initCanvas()
     this.initUI();
     this.initMusics();
     this.autoScale();
@@ -178,6 +176,8 @@ class Game {
 
     this.menuEls.music.on('click', this.bgmPlay.bind(this))
 
+    this.updateAccountBalanceUI()
+
     this.disableGoodsControl()
   }
   initMusics() {
@@ -187,7 +187,6 @@ class Game {
     this.musics.inbound = $(`<audio src="./assets/audio/inbound.mp3"></audio>`)
     this.musics.outbound = $(`<audio src="./assets/audio/outbound.mp3"></audio>`)
     $('body').append(...Object.values(this.musics))
-    // this.musics.bgm[0].play()
   }
   initRenderer() {
     // Create a WebGL renderer
@@ -364,6 +363,7 @@ class Game {
     this.makeNeededGoods()
     setTimeout(this.trainAnimationPlay.bind(this), this.dwellTime)
     this.playLoading()
+    this.bgmPlay()
     this.animate()
   }
   playLoading() {
@@ -474,7 +474,7 @@ class Game {
   }
   trade() {
     const arrivalTime = [
-      5.8, 7.3, 8.5, 10, 12
+      5.8, 7.3, 8.5, 10, 11.5
     ]
     arrivalTime.forEach((time, idx) => {
       setTimeout(() => {
@@ -630,4 +630,8 @@ class Message {
   }
 }
 
-new Game()
+const game = new Game()
+$('#start-button').on('click', () => {
+  game.play()
+  $('#init-menu').hide()
+})

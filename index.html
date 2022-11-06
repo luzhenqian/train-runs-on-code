@@ -11,6 +11,36 @@
     <!-- <script src="./libs/require.min.js"></script> -->
   </head>
   <body class="bg-black">
+    <div
+      id="init-menu"
+      class="fixed w-full h-full bg-black z-50 opacity-90 flex flex-col justify-center items-center gap-[2vw]"
+    >
+      <div
+        class="relative bg-[url('./assets/images/bggame.png')] bg-cover w-[30.5vw] aspect-[1.033/1]"
+      >
+        <div
+          id="start-button"
+          class="absolute top-[15vw] left-[5.4vw] bg-[url('./assets/images/go.png')] bg-cover w-[19.6vw] aspect-[3.6/1] flex justify-center items-center text-[2.4vw] font-[huakang] text-white font-thin cursor-pointer"
+        >
+          开始游戏
+        </div>
+        <div
+          class="absolute top-[22vw] left-[5.4vw] bg-[url('./assets/images/rule.png')] bg-cover w-[19.6vw] aspect-[3.6/1] flex justify-center items-center text-[2.4vw] font-[huakang] text-white font-thin cursor-pointer"
+        >
+          查看规则
+        </div>
+      </div>
+
+      <div>
+        <div class="text-[1.4vw] font-[huakang] text-white font-thin">
+          鸣谢：@掘金 @AMD
+        </div>
+        <div class="text-[1.4vw] font-[huakang] text-white font-thin">
+          作者：代码与野兽
+        </div>
+      </div>
+    </div>
+
     <div class="fixed bottom-0 left-0 right-0 bg">
       <div
         class="absolute bg-[url('./assets/images/money.png')] left-[2.3vw] bottom-[6.3vh] bg-cover w-[28vw] aspect-[2.7/1]"
@@ -19,7 +49,6 @@
           id="account-balance"
           class="absolute text-white left-[50%] top-[50%] translate-x-[-2.3vw] translate-y-[-60%] text-[2.4vw] font-[huakang]"
         >
-          1000￥
         </span>
       </div>
 
@@ -90,7 +119,7 @@
     </div>
 
     <div
-      class="flex justify-center items-center w-[8.85vw] fixed aspect-[1.3/1] -translate-x-full -translate-y-1/2"
+      class="flex justify-center items-center w-[8.85vw] fixed aspect-[1.3/1] -translate-x-[100%] -translate-y-[150%]"
       id="needed-goods-two"
     >
       <div
@@ -130,15 +159,27 @@
     </div>
 
     <div class="fixed right-[21vw] top-[3.2vw] flex flex-col items-center">
-      <img id="pause" src="./assets/images/pause@2x.png" class="w-[6.25vw] aspect-[1/1]"></img>
+      <img
+        id="pause"
+        src="./assets/images/pause@2x.png"
+        class="w-[6.25vw] aspect-[1/1]"
+      />
       <div class="text-[2vw] text-white font-[huakang]">暂停</div>
     </div>
     <div class="fixed right-[13vw] top-[3.2vw] flex flex-col items-center">
-      <img id="bgm" src="./assets/images/music_on@2x.png" class="w-[6.25vw] aspect-[1/1]"></img>
+      <img
+        id="bgm"
+        src="./assets/images/music_on@2x.png"
+        class="w-[6.25vw] aspect-[1/1]"
+      />
       <div class="text-[2vw] text-white font-[huakang]">音乐</div>
     </div>
     <div class="fixed right-[5vw] top-[3.2vw] flex flex-col items-center">
-      <img id="help" src="./assets/images/explain@2x.png" class="w-[6.25vw] aspect-[1/1]"></img>
+      <img
+        id="help"
+        src="./assets/images/explain@2x.png"
+        class="w-[6.25vw] aspect-[1/1]"
+      />
       <div class="text-[2vw] text-white font-[huakang]">帮助</div>
     </div>
 
