@@ -181,7 +181,7 @@ class Game {
 
     this.menuEls.music.on('click', this.bgmPlay.bind(this))
     this.menuEls.pause.on('click', () => {
-      this.isPause ? this.continue() : this.pause()
+      this.isPause ? this.resume() : this.pause()
     })
 
     this.updateAccountBalanceUI()
@@ -343,7 +343,7 @@ class Game {
     this.message.show(`消耗能源！${this.energyConsumptionMoney}`, 'error')
     this.outboundPlay()
     this.updateAccountBalanceUI()
-    setTimeout(() => {
+    this.setNeedInboundPlayTimer = new Timer(() => {
       this.needInboundPlay = true
     }, 2_000)
   }
@@ -398,11 +398,13 @@ class Game {
     this.isPause = true
     this.menuEls.pause.attr('src', './assets/images/start@2x.png')
     this.menuEls.pauseText.text('开始')
+    this.setNeedInboundPlayTimer.pause()
   }
-  continue() {
+  resume() {
     this.isPause = false
     this.menuEls.pause.attr('src', './assets/images/pause@2x.png')
     this.menuEls.pauseText.text('暂停')
+    this.setNeedInboundPlayTimer.resume()
   }
   playLoading() {
     let countdown = this.countdown;
@@ -658,6 +660,30 @@ class Message {
       el.remove()
     }, duration)
     this.timers.push(timer)
+  }
+}
+
+class Timer {
+  timerId = null
+  start = null
+  remaining = 0
+  callback = () => { }
+  constructor(callback, delay) {
+    this.callback = callback
+    this.remaining = delay;
+    this.resume();
+  }
+  pause() {
+    window.clearTimeout(this.timerId);
+    this.timerId = null;
+    this.remaining -= Date.now() - this.start;
+  }
+  resume() {
+    if (this.timerId) {
+      return;
+    }
+    this.start = Date.now();
+    this.timerId = window.setTimeout(this.callback, this.remaining);
   }
 }
 
