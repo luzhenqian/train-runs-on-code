@@ -51,6 +51,7 @@ class Game {
     }
   }
   materials = {}
+  tradeRecords = []
   // ui elements
   producedButtonEls = []
   goodsEls = []
@@ -76,6 +77,8 @@ class Game {
   neededGoods = []
   producedGoods = []
   musics = {}
+  portMesh = null
+  needInboundPlay = false
   constructor() {
     this.initCanvas()
     this.initUI();
@@ -266,6 +269,9 @@ class Game {
           if (child.name === 'castle_T5') {
             this.cityMeshes[4] = child
           }
+          if (child.name === 'box2') {
+            this.portMesh = child
+          }
         })
         this.scene.add(model);
 
@@ -326,20 +332,20 @@ class Game {
     this.updateLoadedGoodsMesh()
     this.neededGoodsEls.forEach(neededGoodsEl => neededGoodsEl.show())
     this.playLoading()
+    this.tradeRecords = []
   }
   departure() {
     this.producedButtonEls.forEach(btnEl => btnEl.hide())
     this.disableGoodsControl()
     this.refreshEl.css('filter', 'grayscale(100%)')
-    this.trade()
 
     this.accountBalance += this.energyConsumptionMoney
     this.message.show(`消耗能源！${this.energyConsumptionMoney}`, 'error')
     this.outboundPlay()
-    setTimeout(() => {
-      this.inboundPlay()
-    }, 13_000)
     this.updateAccountBalanceUI()
+    setTimeout(() => {
+      this.needInboundPlay = true
+    }, 2_000)
   }
   autoScale() {
     window.addEventListener('resize', () => {
@@ -357,6 +363,23 @@ class Game {
     }
     if (!this.isPause && this.trainMixer) {
       this.trainMixer.update(delta);
+
+      // 交易
+      this.cityMeshes.forEach((cityMesh, idx) => {
+        if (this.cabinMeshes[1].position.distanceTo(this.cityMeshes[idx].position) < 800) {
+          if (this.tradeRecords[idx]) { return }
+          this.tradeRecords[idx] = true
+          this.trade(idx)
+        }
+      })
+
+      // 到达
+      if (this.needInboundPlay) {
+        if (this.cabinMeshes[0].position.distanceTo(this.portMesh.position) < 600) {
+          this.inboundPlay()
+          this.needInboundPlay = false
+        }
+      }
     }
 
     this.controls.update();
@@ -487,26 +510,19 @@ class Game {
     )
     this.refreshEl.css('pointer-events', 'auto');
   }
-  trade() {
-    const arrivalTime = [
-      5.8, 7.3, 8.5, 10, 11.5
-    ]
-    arrivalTime.forEach((time, idx) => {
-      setTimeout(() => {
-        const successIdx = this.loadedGoods.findIndex(goods => goods === this.neededGoods[idx])
-        if (successIdx > -1) {
-          const goods = this.loadedGoods[successIdx]
-          this.goodsMeshes[successIdx].visible = false
-          this.loadedGoods[successIdx] = null
-          this.neededGoodsEls[idx].hide()
-          const money = this.allGoods[goods].price
-          this.accountBalance += money
-          this.message.show(`交易成功！+${money}`, 'success')
-          this.refreshMusicPlay()
-          this.updateAccountBalanceUI()
-        }
-      }, time * 1000)
-    })
+  trade(cityIdx) {
+    const successIdx = this.loadedGoods.findIndex(goods => goods === this.neededGoods[cityIdx])
+    if (successIdx > -1) {
+      const goods = this.loadedGoods[successIdx]
+      this.goodsMeshes[successIdx].visible = false
+      this.loadedGoods[successIdx] = null
+      this.neededGoodsEls[cityIdx].hide()
+      const money = this.allGoods[goods].price
+      this.accountBalance += money
+      this.message.show(`交易成功！+${money}`, 'success')
+      this.refreshMusicPlay()
+      this.updateAccountBalanceUI()
+    }
   }
   refreshProducedGoods() {
     this.producedGoods.forEach(goods => {
