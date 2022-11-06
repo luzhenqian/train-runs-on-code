@@ -52,7 +52,7 @@ class Game {
   }
   materials = {}
   // ui elements
-  btnEls = []
+  producedButtonEls = []
   goodsEls = []
   countdownEl = null
   loadingEl = null
@@ -60,6 +60,7 @@ class Game {
   accountBalanceEl = null
   neededGoodsEls = []
   message = new Message()
+  menuEls = {}
   // arguments
   dwellTime = 10_000
   countdown = 10
@@ -74,11 +75,13 @@ class Game {
   loadedGoods = [null, null, null]
   neededGoods = []
   producedGoods = []
+  musics = {}
   constructor() {
     this.initCanvas().then(() => {
       this.play()
     });
     this.initUI();
+    this.initMusics();
     this.autoScale();
   }
   initCanvas() {
@@ -91,7 +94,7 @@ class Game {
     return this.loadModel()
   }
   initUI() {
-    this.btnEls = [
+    this.producedButtonEls = [
       $('#btn-one'),
       $('#btn-two'),
       $('#btn-three'),
@@ -132,11 +135,10 @@ class Game {
     this.accountBalanceEl = $('#account-balance')
     this.refreshEl = $('#refresh')
     this.refreshEl.on('click', this.refreshProducedGoods.bind(this))
-    console.log(    this.refreshEl.find('#refresh-money'), 's');
     $('#refresh-money').text(`${-this.refreshMoney}￥`)
 
     // 绑定装货/卸货事件
-    this.btnEls.forEach((btnEl, idx) => {
+    this.producedButtonEls.forEach((btnEl, idx) => {
       btnEl.on('click', () => {
         // 卸载货物
         if (this.producedGoods[idx].loaded) {
@@ -164,12 +166,28 @@ class Game {
           }
         }
 
+        this.musics.load[0].play()
         this.updateButtonUI()
         this.updateLoadedGoodsMesh()
       })
     })
 
+    this.menuEls = {
+      'music': $('#bgm'),
+    }
+
+    this.menuEls.music.on('click', this.bgmPlay.bind(this))
+
     this.disableGoodsControl()
+  }
+  initMusics() {
+    this.musics.bgm = $(`<audio src="./assets/audio/bgm.mp3" loop="loop"></audio>`)
+    this.musics.load = $(`<audio src="./assets/audio/load.mp3"></audio>`)
+    this.musics.refresh = $(`<audio src="./assets/audio/refresh.mp3"></audio>`)
+    this.musics.inbound = $(`<audio src="./assets/audio/inbound.mp3"></audio>`)
+    this.musics.outbound = $(`<audio src="./assets/audio/outbound.mp3"></audio>`)
+    $('body').append(...Object.values(this.musics))
+    // this.musics.bgm[0].play()
   }
   initRenderer() {
     // Create a WebGL renderer
@@ -297,7 +315,7 @@ class Game {
     this.makeProducedGoods()
     this.makeNeededGoods()
     this.updateButtonUI()
-    this.btnEls.forEach(btnEl => btnEl.show())
+    this.producedButtonEls.forEach(btnEl => btnEl.show())
     this.activeGoodsControl()
     this.refreshEl.css('filter', 'none')
     this.loadedGoods = [null, null, null]
@@ -306,13 +324,17 @@ class Game {
     this.playLoading()
   }
   departure() {
-    this.btnEls.forEach(btnEl => btnEl.hide())
+    this.producedButtonEls.forEach(btnEl => btnEl.hide())
     this.disableGoodsControl()
     this.refreshEl.css('filter', 'grayscale(100%)')
     this.trade()
 
     this.accountBalance += this.energyConsumptionMoney
     this.message.show(`消耗能源！${this.energyConsumptionMoney}`, 'error')
+    this.outboundPlay()
+    setTimeout(() => {
+      this.inboundPlay()
+    }, 13_000)
     this.updateAccountBalanceUI()
   }
   autoScale() {
@@ -430,7 +452,7 @@ class Game {
         `url(./assets/images/goods_${this.producedGoods[idx]?.name || 'gpu'}_off@2x.png)`
       )
     })
-    this.btnEls.forEach((btnEl) => {
+    this.producedButtonEls.forEach((btnEl) => {
       btnEl.hide()
     })
     this.refreshEl.css(
@@ -440,7 +462,7 @@ class Game {
     this.refreshEl.css('pointer-events', 'none');
   }
   activeGoodsControl() {
-    this.btnEls.forEach((btnEl) => {
+    this.producedButtonEls.forEach((btnEl) => {
       btnEl.show()
     })
 
@@ -465,6 +487,7 @@ class Game {
           const money = this.allGoods[goods].price
           this.accountBalance += money
           this.message.show(`交易成功！+${money}`, 'success')
+          this.refreshMusicPlay()
           this.updateAccountBalanceUI()
         }
       }, time * 1000)
@@ -478,7 +501,33 @@ class Game {
         goods.name = keys[Math.floor(Math.random() * len)]
       }
     })
+    this.refreshMusicPlay()
     this.updateProducedGoodsUI()
+  }
+  refreshMusicPlay() {
+    const refreshMusicPlayer = this.musics.refresh[0]
+    refreshMusicPlayer.currentTime = 0
+    refreshMusicPlayer.play();
+  }
+  bgmPlay() {
+    const bgmPlayer = this.musics.bgm[0]
+    console.log(bgmPlayer, 'bb');
+    if (bgmPlayer.paused) {
+      bgmPlayer.currentTime = 0
+      bgmPlayer.play();
+    } else {
+      bgmPlayer.pause();
+    }
+  }
+  inboundPlay() {
+    const inboundPlayer = this.musics.inbound[0]
+    inboundPlayer.currentTime = 0
+    inboundPlayer.play();
+  }
+  outboundPlay() {
+    const outboundPlayer = this.musics.outbound[0]
+    outboundPlayer.currentTime = 0
+    outboundPlayer.play();
   }
   updateLoadedGoodsMesh() {
     this.goodsMeshes.forEach((goodsMesh, idx) => {
@@ -498,41 +547,41 @@ class Game {
           'background-image',
           `url(./assets/images/goods_${goods.name}_off@2x.png)`
         )
-        this.btnEls[idx].css(
+        this.producedButtonEls[idx].css(
           'background-image',
           'url("./assets/images/reselect-btn.png")'
         )
-        this.btnEls[idx].hover(
+        this.producedButtonEls[idx].hover(
           () => {
-            this.btnEls[idx]
+            this.producedButtonEls[idx]
               .css('background-image', 'url("./assets/images/reselect-btn-hover.png")')
           },
           () => {
-            this.btnEls[idx]
+            this.producedButtonEls[idx]
               .css('background-image', 'url("./assets/images/reselect-btn.png")')
           }
         )
-        this.btnEls[idx].text('卸货')
+        this.producedButtonEls[idx].text('卸货')
       } else {
         this.goodsEls[idx].css(
           'background-image',
           `url(./assets/images/goods_${goods.name}_on@2x.png)`
         )
-        this.btnEls[idx].css(
+        this.producedButtonEls[idx].css(
           'background-image',
           'url("./assets/images/btn.png")'
         )
-        this.btnEls[idx].hover(
+        this.producedButtonEls[idx].hover(
           () => {
-            this.btnEls[idx]
+            this.producedButtonEls[idx]
               .css('background-image', 'url("./assets/images/btn-hover.png")')
           },
           () => {
-            this.btnEls[idx]
+            this.producedButtonEls[idx]
               .css('background-image', 'url("./assets/images/btn.png")')
           },
         )
-        this.btnEls[idx].text('装货')
+        this.producedButtonEls[idx].text('装货')
       }
     })
   }
