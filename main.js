@@ -474,7 +474,7 @@ class Game {
   }
   trade() {
     const arrivalTime = [
-      5, 7, 9, 10, 12
+      5.8, 7.3, 8.5, 10, 12
     ]
     arrivalTime.forEach((time, idx) => {
       setTimeout(() => {
@@ -511,12 +511,13 @@ class Game {
   }
   bgmPlay() {
     const bgmPlayer = this.musics.bgm[0]
-    console.log(bgmPlayer, 'bb');
     if (bgmPlayer.paused) {
       bgmPlayer.currentTime = 0
       bgmPlayer.play();
+      this.menuEls.music.attr('src', './assets/images/music_off@2x.png')
     } else {
       bgmPlayer.pause();
+      this.menuEls.music.attr('src', './assets/images/music_on@2x.png')
     }
   }
   inboundPlay() {
