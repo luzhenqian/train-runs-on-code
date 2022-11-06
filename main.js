@@ -68,7 +68,6 @@ class Game {
   energyConsumptionMoney = -50
   carryMoney = -10
   refreshMoney = -50
-  start = false
   // meshes
   cityMeshes = []
   cabinMeshes = []
@@ -76,7 +75,9 @@ class Game {
   neededGoods = []
   producedGoods = []
   constructor() {
-    this.initCanvas();
+    this.initCanvas().then(() => {
+      this.play()
+    });
     this.initUI();
     this.autoScale();
   }
@@ -86,8 +87,8 @@ class Game {
     this.initScene()
     this.initCamera()
     this.initControls()
-    this.loadModel()
     this.initEnvironment()
+    return this.loadModel()
   }
   initUI() {
     this.btnEls = [
@@ -100,8 +101,23 @@ class Game {
       $('#goods-two'),
       $('#goods-three'),
     ]
+
+    this.loadingEl = $(`<div
+      id="loading"
+      class="flex flex-col items-center fixed top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-10"
+    >
+      <span class="text-white font-[huakang] text-[2.8vw]"
+        >码上掘金 即将到来</span
+      >
+      <img src="./assets/images/loading.gif" />
+      <span id="countdown" class="text-white font-[huakang] text-[2.8vw]"
+        >10s</span
+      >
+    </div>`)
+    $('body').append(this.loadingEl)
+    this.loadingEl.hide()
     this.countdownEl = $('#countdown')
-    this.loadingEl = $('#loading')
+
     this.neededGoodsEls = [
       $("#needed-goods-one"),
       $("#needed-goods-two"),
@@ -112,7 +128,7 @@ class Game {
     this.accountBalanceEl = $('#account-balance')
     this.refreshEl = $('#refresh')
     this.refreshEl.on('click', this.refreshProducedGoods.bind(this))
-
+    // 绑定事件
     this.btnEls.forEach((btnEl, idx) => {
       btnEl.on('click', () => {
         // 卸载货物
@@ -145,6 +161,8 @@ class Game {
         this.updateLoadedGoodsMesh()
       })
     })
+
+    this.disableGoodsControl()
   }
   initRenderer() {
     // Create a WebGL renderer
@@ -194,66 +212,78 @@ class Game {
       })
     })
   }
-  loadModel() {
-    const loader = new GLTFLoader();
-    loader.load('./assets/model/terrain.gltf', (gltf) => {
-      const model = gltf.scene;
-      model.scale.set(this.modelScale, this.modelScale, this.modelScale);
-      model.children.forEach(child => {
-        if (child.name === 'castle_T1') {
-          this.cityMeshes[0] = child
-        }
-        if (child.name === 'castle_T2') {
-          this.cityMeshes[1] = child
-        }
-        if (child.name === 'castle_T3') {
-          this.cityMeshes[2] = child
-        }
-        if (child.name === 'castle_T4') {
-          this.cityMeshes[3] = child
-        }
-        if (child.name === 'castle_T5') {
-          this.cityMeshes[4] = child
-        }
-      })
-      this.scene.add(model);
+  async loadModel() {
+    return Promise.all([this.loadTerrainModel(), this.loadTrainModel()])
+  }
+  async loadTerrainModel() {
+    return new Promise((resolve) => {
+      const loader = new GLTFLoader();
+      loader.load('./assets/model/terrain.gltf', (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(this.modelScale, this.modelScale, this.modelScale);
+        model.children.forEach(child => {
+          if (child.name === 'castle_T1') {
+            this.cityMeshes[0] = child
+          }
+          if (child.name === 'castle_T2') {
+            this.cityMeshes[1] = child
+          }
+          if (child.name === 'castle_T3') {
+            this.cityMeshes[2] = child
+          }
+          if (child.name === 'castle_T4') {
+            this.cityMeshes[3] = child
+          }
+          if (child.name === 'castle_T5') {
+            this.cityMeshes[4] = child
+          }
+        })
+        this.scene.add(model);
 
-      const terrainMixer = this.terrainMixer = new THREE.AnimationMixer(model);
-      terrainMixer.clipAction(gltf.animations[0]).play();
+        const terrainMixer = this.terrainMixer = new THREE.AnimationMixer(model);
+        terrainMixer.clipAction(gltf.animations[0]).play();
+        resolve(null)
+      })
     })
+  }
+  async loadTrainModel() {
+    return new Promise((resolve) => {
+      const loader = new GLTFLoader();
 
-    loader.load('./assets/model/ani.gltf', (gltf) => {
-      const model = gltf.scene;
-      model.scale.set(this.modelScale, this.modelScale, this.modelScale);
+      loader.load('./assets/model/train.gltf', (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(this.modelScale, this.modelScale, this.modelScale);
 
-      model.children.forEach(child => {
-        if (child.name === 'locomotive-wagon-western1') {
-          this.cabinMeshes[0] = child
-        }
-        if (child.name === 'locomotive-wagon-western2') {
-          this.cabinMeshes[1] = child
-        }
-        if (child.name === 'locomotive-wagon-western3') {
-          this.cabinMeshes[2] = child
-        }
-        if (child.name === 'box1_') {
-          this.goodsMeshes[0] = child;
-        }
-        if (child.name === 'box2') {
-          this.goodsMeshes[1] = child;
-        }
-        if (child.name === 'box3') {
-          this.goodsMeshes[2] = child;
-        }
+        model.children.forEach(child => {
+          if (child.name === 'locomotive-wagon-western1') {
+            this.cabinMeshes[0] = child
+          }
+          if (child.name === 'locomotive-wagon-western2') {
+            this.cabinMeshes[1] = child
+          }
+          if (child.name === 'locomotive-wagon-western3') {
+            this.cabinMeshes[2] = child
+          }
+          if (child.name === 'box1_') {
+            this.goodsMeshes[0] = child;
+          }
+          if (child.name === 'box2') {
+            this.goodsMeshes[1] = child;
+          }
+          if (child.name === 'box3') {
+            this.goodsMeshes[2] = child;
+          }
+        })
+
+        this.updateLoadedGoodsMesh()
+
+        this.scene.add(model);
+
+        // Create a mixer
+        this.trainMixer = new THREE.AnimationMixer(model);
+        this.trainAnimation = this.trainMixer.clipAction(gltf.animations[0])
+        resolve(null)
       })
-
-      this.updateLoadedGoodsMesh()
-
-      this.scene.add(model);
-
-      // Create a mixer
-      this.trainMixer = new THREE.AnimationMixer(model);
-      this.trainAnimation = this.trainMixer.clipAction(gltf.animations[0])
     })
   }
   arrival() {
@@ -266,6 +296,7 @@ class Game {
     this.loadedGoods = [null, null, null]
     this.updateLoadedGoodsMesh()
     this.neededGoodsEls.forEach(neededGoodsEl => neededGoodsEl.show())
+    this.playLoading()
   }
   departure() {
     this.btnEls.forEach(btnEl => btnEl.hide())
@@ -291,33 +322,32 @@ class Game {
       this.terrainMixer.update(delta);
       this.setAllDemandGoodsPosition()
     }
-    if (this.start && this.trainMixer) {
+    if (this.trainMixer) {
       this.trainMixer.update(delta);
-      // this.goodsMeshRenderer()
     }
 
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
   play() {
+    this.activeGoodsControl()
+    this.makeProducedGoods()
+    this.makeNeededGoods()
+    setTimeout(this.trainAnimationPlay.bind(this), this.dwellTime)
+    this.playLoading()
+    this.animate()
+  }
+  playLoading() {
     let countdown = this.countdown;
-    this.countdownEl.text(`${countdown -= 1}s`)
-    this.disableGoodsControl()
+    this.countdownEl.text(`${countdown}s`)
+    this.loadingEl.show()
     const timer = setInterval(() => {
       this.countdownEl.text(`${countdown -= 1}s`)
       if (countdown === 0) {
         this.loadingEl.hide()
-        this.activeGoodsControl()
         clearInterval(timer)
-        this.start = true
-
-        this.makeProducedGoods()
-        this.makeNeededGoods()
-        setTimeout(this.trainAnimationPlay.bind(this), this.dwellTime)
       }
     }, 1_000)
-
-    this.animate()
   }
   makeProducedGoods() {
     for (let i = 0; i < 3; i++) {
@@ -503,9 +533,10 @@ class Game {
   }
   updateProducedGoodsUI() {
     this.goodsEls.forEach((goodsEl, idx) => {
+      const status = this.producedGoods[idx].loaded ? 'off' : 'on'
       goodsEl.css(
         'background-image',
-        `url(./assets/images/goods_${this.producedGoods[idx].name}_on@2x.png)`
+        `url(./assets/images/goods_${this.producedGoods[idx].name}_${status}@2x.png)`
       )
     })
     this.accountBalance += this.refreshMoney
@@ -541,4 +572,4 @@ class Message {
   }
 }
 
-new Game().play()
+new Game()
