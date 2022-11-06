@@ -64,7 +64,7 @@ class Game {
   // arguments
   dwellTime = 10_000
   countdown = 10
-  start = false
+  isPause = false
   accountBalance = 500
   energyConsumptionMoney = -50
   carryMoney = -5
@@ -165,16 +165,21 @@ class Game {
         }
 
         this.musics.load[0].play()
-        this.updateButtonUI()
+        this.updateProducedGoodsButtonUI()
         this.updateLoadedGoodsMesh()
       })
     })
 
     this.menuEls = {
       'music': $('#bgm'),
+      'pause': $('#pause'),
+      'pauseText': $('#pause-text'),
     }
 
     this.menuEls.music.on('click', this.bgmPlay.bind(this))
+    this.menuEls.pause.on('click', () => {
+      this.isPause ? this.continue() : this.pause()
+    })
 
     this.updateAccountBalanceUI()
 
@@ -313,7 +318,7 @@ class Game {
   arrival() {
     this.makeProducedGoods()
     this.makeNeededGoods()
-    this.updateButtonUI()
+    this.updateProducedGoodsButtonUI()
     this.producedButtonEls.forEach(btnEl => btnEl.show())
     this.activeGoodsControl()
     this.refreshEl.css('filter', 'none')
@@ -350,7 +355,7 @@ class Game {
       this.terrainMixer.update(delta);
       this.setAllDemandGoodsPosition()
     }
-    if (this.trainMixer) {
+    if (!this.isPause && this.trainMixer) {
       this.trainMixer.update(delta);
     }
 
@@ -365,6 +370,16 @@ class Game {
     this.playLoading()
     this.bgmPlay()
     this.animate()
+  }
+  pause() {
+    this.isPause = true
+    this.menuEls.pause.attr('src', './assets/images/start@2x.png')
+    this.menuEls.pauseText.text('开始')
+  }
+  continue() {
+    this.isPause = false
+    this.menuEls.pause.attr('src', './assets/images/pause@2x.png')
+    this.menuEls.pauseText.text('暂停')
   }
   playLoading() {
     let countdown = this.countdown;
@@ -541,7 +556,7 @@ class Game {
       goodsMesh.visible = true
     })
   }
-  updateButtonUI() {
+  updateProducedGoodsButtonUI() {
     this.producedGoods.forEach((goods, idx) => {
       if (goods.loaded) {
         this.goodsEls[idx].css(
