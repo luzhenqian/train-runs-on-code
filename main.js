@@ -121,9 +121,6 @@ class Game {
         >10s</span
       >
     </div>`)
-    // this.loadingImage = new Image()
-    // this.loadingImage.src = './assets/images/loading.gif'
-    // .attr('src', this.loadingImage.src);
 
     const loadingImgEl = this.loadingEl.find('img')
     this.loadingControl = new Loading(loadingImgEl)
