@@ -52,6 +52,7 @@ class Game {
   }
   materials = {}
   tradeRecords = []
+  loadingControl = null
   // ui elements
   producedButtonEls = []
   goodsEls = []
@@ -120,9 +121,12 @@ class Game {
         >10s</span
       >
     </div>`)
-    this.loadingImage = new Image()
-    this.loadingImage.src = './assets/images/loading.gif'
-    this.loadingEl.find('img').attr('src', this.loadingImage.src);
+    // this.loadingImage = new Image()
+    // this.loadingImage.src = './assets/images/loading.gif'
+    // .attr('src', this.loadingImage.src);
+
+    const loadingImgEl = this.loadingEl.find('img')
+    this.loadingControl = new Loading(loadingImgEl)
 
     $('body').append(this.loadingEl)
     this.loadingEl.hide()
@@ -405,6 +409,7 @@ class Game {
     if (this.setNeedInboundPlayTimer) { this.setNeedInboundPlayTimer.pause() }
     this.countdownTimer.pause()
     this?.trainAnimationTimer?.pause()
+    this?.loadingControl?.pause()
   }
   resume() {
     this.isPause = false
@@ -413,12 +418,14 @@ class Game {
     if (this.setNeedInboundPlayTimer) { this.setNeedInboundPlayTimer.resume() }
     this.countdownTimer.resume()
     this?.trainAnimationTimer?.resume()
+    this?.loadingControl?.resume()
   }
   nextLoop() {
     let countdown = this.countdown;
     this.countdownEl.text(`${countdown}s`)
     this.loadingEl.show()
-    this.loadingEl.find('img').attr('src', this.loadingImage.src);
+    // this.loadingEl.find('img').attr('src', this.loadingImage.src);
+    this.loadingControl.play()
     const cbFn = () => {
       this.countdownEl.text(`${countdown -= 1}s`)
       if (countdown === 0) {
@@ -699,6 +706,40 @@ class Timer {
   clear() {
     window.clearTimeout(this.timerId);
     this.timerId = null;
+  }
+}
+
+class Loading {
+  constructor(el) {
+    this.el = el
+  }
+  #parseIdx = (idx) => {
+    if (idx < 10) {
+      return `00${idx}`
+    }
+    if (idx < 100) {
+      return `0${idx}`
+    }
+    return `${idx}`
+  }
+  play() {
+    let i = 0
+    const next = () => {
+      this.el.attr('src', `./assets/images/loading/进度条${this.#parseIdx(i++)}.png`)
+      this.timer.clear()
+      if (i === 250) {
+        i = 0
+        return
+      }
+      this.timer = new Timer(next, 10_000 / 250)
+    }
+    this.timer = new Timer(next, 10_000 / 250)
+  }
+  pause() {
+    this.timer.pause()
+  }
+  resume() {
+    this.timer.resume()
   }
 }
 
