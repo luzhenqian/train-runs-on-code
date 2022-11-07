@@ -63,7 +63,6 @@ class Game {
   message = new Message()
   menuEls = {}
   // arguments
-  dwellTime = 10_000
   countdown = 10
   isPause = false
   accountBalance = 500
@@ -79,6 +78,9 @@ class Game {
   musics = {}
   portMesh = null
   needInboundPlay = false
+  setNeedInboundPlayTimer = null
+  countdownTimer = null
+  trainAnimationTimer = null
   constructor() {
     this.initCanvas()
     this.initUI();
@@ -331,7 +333,7 @@ class Game {
     this.loadedGoods = [null, null, null]
     this.updateLoadedGoodsMesh()
     this.neededGoodsEls.forEach(neededGoodsEl => neededGoodsEl.show())
-    this.playLoading()
+    this.nextLoop()
     this.tradeRecords = []
   }
   departure() {
@@ -343,6 +345,9 @@ class Game {
     this.message.show(`消耗能源！${this.energyConsumptionMoney}`, 'error')
     this.outboundPlay()
     this.updateAccountBalanceUI()
+    if (this.setNeedInboundPlayTimer !== null) {
+      this.setNeedInboundPlayTimer.clear()
+    }
     this.setNeedInboundPlayTimer = new Timer(() => {
       this.needInboundPlay = true
     }, 2_000)
@@ -389,8 +394,7 @@ class Game {
     this.activeGoodsControl()
     this.makeProducedGoods()
     this.makeNeededGoods()
-    setTimeout(this.trainAnimationPlay.bind(this), this.dwellTime)
-    this.playLoading()
+    this.nextLoop()
     this.bgmPlay()
     this.animate()
   }
@@ -398,26 +402,37 @@ class Game {
     this.isPause = true
     this.menuEls.pause.attr('src', './assets/images/start@2x.png')
     this.menuEls.pauseText.text('开始')
-    this.setNeedInboundPlayTimer.pause()
+    if (this.setNeedInboundPlayTimer) { this.setNeedInboundPlayTimer.pause() }
+    this.countdownTimer.pause()
+    this?.trainAnimationTimer?.pause()
   }
   resume() {
     this.isPause = false
     this.menuEls.pause.attr('src', './assets/images/pause@2x.png')
     this.menuEls.pauseText.text('暂停')
-    this.setNeedInboundPlayTimer.resume()
+    if (this.setNeedInboundPlayTimer) { this.setNeedInboundPlayTimer.resume() }
+    this.countdownTimer.resume()
+    this?.trainAnimationTimer?.resume()
   }
-  playLoading() {
+  nextLoop() {
     let countdown = this.countdown;
     this.countdownEl.text(`${countdown}s`)
     this.loadingEl.show()
     this.loadingEl.find('img').attr('src', this.loadingImage.src);
-    const timer = setInterval(() => {
+    const cbFn = () => {
       this.countdownEl.text(`${countdown -= 1}s`)
       if (countdown === 0) {
         this.loadingEl.hide()
-        clearInterval(timer)
+        this.trainAnimationPlay()
+        this.countdownTimer.clear()
+        return
       }
-    }, 1_000)
+
+      this?.countdownTimer?.clear()
+      this.countdownTimer = new Timer(cbFn, 1_000)
+    }
+    this?.countdownTimer?.clear()
+    this.countdownTimer = new Timer(cbFn, 1_000)
   }
   makeProducedGoods() {
     for (let i = 0; i < 3; i++) {
@@ -479,10 +494,6 @@ class Game {
     this.trainMixer.addEventListener('loop', (e) => {
       this.trainAnimation.stop();
       this.arrival()
-      setTimeout(() => {
-        this.trainAnimation.play();
-        this.departure()
-      }, this.dwellTime)
     });
   }
   disableGoodsControl() {
@@ -684,6 +695,10 @@ class Timer {
     }
     this.start = Date.now();
     this.timerId = window.setTimeout(this.callback, this.remaining);
+  }
+  clear() {
+    window.clearTimeout(this.timerId);
+    this.timerId = null;
   }
 }
 
