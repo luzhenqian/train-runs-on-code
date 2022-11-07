@@ -1,7 +1,4 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'OrbitControls';
-import { GLTFLoader } from 'GLTFLoader'
-import { RoomEnvironment } from "RoomEnvironment"
+const { OrbitControls, RoomEnvironment, GLTFLoader } = THREE;
 
 class Game {
   // three arguments
