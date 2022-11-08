@@ -255,12 +255,12 @@ class Game {
       const moveCallback = (e) => {
         e.preventDefault()
         const clientY = e.originalEvent.clientY
-        const delta = clientY - start
+        let delta = clientY - start
         if (delta < 0) {
-          return
+          delta = 0
         }
         if (delta > scrollbarTrackEl.height() - scrollbarButtonEl.height()) {
-          return
+          delta = scrollbarTrackEl.height() - scrollbarButtonEl.height()
         }
 
         scrollbarButtonEl.css('top', `${delta}px`)
@@ -278,7 +278,7 @@ class Game {
     this.helpMenuEls.helpMenu.on('mousewheel', (e) => {
       e.preventDefault()
       const top = Number(scrollbarButtonEl.css('top').replace('px', ''))
-      const delta = top - e.originalEvent.wheelDelta / 20
+      let delta = top - e.originalEvent.wheelDelta / 20
 
       if (delta < 0) {
         delta = 0
