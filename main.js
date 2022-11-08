@@ -819,7 +819,9 @@ class Loading {
   play() {
     let i = 0
     const next = () => {
-      this.el.attr('src', `./assets/images/loading/进度条${this.#parseIdx(i++)}.png`)
+      const nextEl = queue.getResult(`assets.images.loading.进度条${this.#parseIdx(i++)}.png`)
+      this.el.replaceWith(nextEl)
+      this.el = nextEl
       this.timer.clear()
       if (i === 250) {
         i = 0

@@ -4,13 +4,11 @@ const loadResourceEl = $('#load-resource')
 loadResourceEl.text('开始加载资源')
 
 queue.on("complete", () => {
-  console.log("done");
   loadResourceEl.hide()
   new Game()
 });
 
 queue.on("progress", (progress) => {
-  console.log("progress", progress.loaded);
   loadResourceEl.text('游戏加载资源中 ' + Math.floor(progress.loaded * 100) + '%')
 });
 
