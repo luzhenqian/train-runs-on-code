@@ -23,18 +23,20 @@ function genPreload(path, pathKey) {
 
 genPreload('./assets', 'assets.')
 
-console.log(resources, 'resources');
-
 fs.writeFileSync('./preload.js', `const queue = new createjs.LoadQueue();
 
-console.log("开始加载资源");
+const loadResourceEl = $('#load-resource')
+loadResourceEl.text('开始加载资源')
 
 queue.on("complete", () => {
   console.log("done");
+  loadResourceEl.hide()
+  new Game()
 });
 
 queue.on("progress", (progress) => {
   console.log("progress", progress.loaded);
+  loadResourceEl.text('游戏加载资源中 ' + Math.floor(progress.loaded * 100) + '%')
 });
 
 const resources = ${JSON.stringify(resources, null, 2)}

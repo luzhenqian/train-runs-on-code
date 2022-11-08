@@ -1,16 +1,17 @@
 const queue = new createjs.LoadQueue();
 
-const now = performance.now()
-console.log("开始加载资源");
+const loadResourceEl = $('#load-resource')
+loadResourceEl.text('开始加载资源')
 
 queue.on("complete", () => {
   console.log("done");
-  const doneNow = performance.now();
-  console.log(doneNow - now);
+  loadResourceEl.hide()
+  new Game()
 });
 
 queue.on("progress", (progress) => {
   console.log("progress", progress.loaded);
+  loadResourceEl.text('游戏加载资源中 ' + Math.floor(progress.loaded * 100) + '%')
 });
 
 const resources = [
@@ -43,6 +44,10 @@ const resources = [
     "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/fonts/华康海报体W12.ttf"
   },
   {
+    "id": "assets.images.Div@2x.png",
+    "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/Div@2x.png"
+  },
+  {
     "id": "assets.images.bg.png",
     "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/bg.png"
   },
@@ -71,8 +76,28 @@ const resources = [
     "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/bubble.jpg"
   },
   {
+    "id": "assets.images.close@2x.png",
+    "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/close@2x.png"
+  },
+  {
     "id": "assets.images.display.png",
     "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/display.png"
+  },
+  {
+    "id": "assets.images.drop_down box@2x.png",
+    "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/drop_down box@2x.png"
+  },
+  {
+    "id": "assets.images.element1@2x.png",
+    "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/element1@2x.png"
+  },
+  {
+    "id": "assets.images.element2@2x.png",
+    "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/element2@2x.png"
+  },
+  {
+    "id": "assets.images.element3@2x.png",
+    "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/element3@2x.png"
   },
   {
     "id": "assets.images.explain@2x.png",

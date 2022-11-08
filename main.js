@@ -837,4 +837,3 @@ class Loading {
   }
 }
 
-const game = new Game()
