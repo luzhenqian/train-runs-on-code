@@ -281,10 +281,10 @@ class Game {
       const delta = top - e.originalEvent.wheelDelta / 20
 
       if (delta < 0) {
-        return
+        delta = 0
       }
       if (delta > scrollbarTrackEl.height() - scrollbarButtonEl.height()) {
-        return
+        delta = scrollbarTrackEl.height() - scrollbarButtonEl.height()
       }
 
       scrollbarButtonEl.css('top', `${delta}px`)

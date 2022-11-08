@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node ./scripts/gen-preload.js && node ./scripts/build-juejin.js"
+    "build": "node ./scripts/gen-preload.js && node ./scripts/build-juejin.js",
+    "start": "serve . -p 5678"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   "homepage": "https://github.com/luzhenqian/train-runs-on-code#readme",
   "dependencies": {
     "node-html-parser": "^6.1.1",
-    "replaceall": "^0.1.6"
+    "replaceall": "^0.1.6",
+    "serve": "^14.1.0"
   }
 }
