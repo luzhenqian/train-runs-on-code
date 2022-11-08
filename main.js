@@ -60,6 +60,7 @@ class Game {
   neededGoodsEls = []
   message = new Message()
   menuEls = {}
+  helpMenuEls = {}
   // arguments
   countdown = 10
   isPause = false
@@ -177,12 +178,111 @@ class Game {
       'music': $('#bgm'),
       'pause': $('#pause'),
       'pauseText': $('#pause-text'),
+      'help': $('#help'),
     }
 
     this.menuEls.music.on('click', this.bgmPlay.bind(this))
     this.menuEls.pause.on('click', () => {
       this.isPause ? this.resume() : this.pause()
     })
+    this.menuEls.help.on('click', () => {
+      this.pause()
+      this.helpMenuEls.helpMenu.show()
+      this.helpMenuEls.helpMenu.data('isOpen', true)
+      this.helpMenuEls.closeButton.on('click', () => {
+        this.helpMenuEls.helpMenu.hide()
+        this.helpMenuEls.helpMenu.data('isOpen', false)
+        this.resume()
+      })
+    })
+
+    this.initMenuEls = {
+      initMenu: $('#init-menu'),
+      startButton: $('#start-button'),
+      helpButton: $('#help-button'),
+    }
+    this.initMenuEls.startButton.on('click', () => {
+      this.play()
+      this.helpMenuEls.closeButton.off('click')
+      this.initMenuEls.initMenu.hide()
+    })
+    this.initMenuEls.helpButton.on('click', () => {
+      this.initMenuEls.initMenu.hide()
+      this.helpMenuEls.helpMenu.show()
+      this.helpMenuEls.helpMenu.data('isOpen', true)
+      this.helpMenuEls.closeButton.on('click', () => {
+        this.helpMenuEls.helpMenu.hide()
+        this.helpMenuEls.helpMenu.data('isOpen', true)
+        this.initMenuEls.initMenu.show()
+      })
+    })
+
+    this.helpMenuEls = {
+      helpMenu: $('#help-menu'),
+      closeButton: $('#help-close-button'),
+      scrollbarButtonEl: $('#scrollbar-button'),
+      scrollbarTrackEl: $('#scrollbar-track'),
+      helpContentEl: $('#help-content')
+    }
+    const scrollbarButtonEl = this.helpMenuEls.scrollbarButtonEl
+    const scrollbarTrackEl = this.helpMenuEls.scrollbarTrackEl
+    const helpContent = this.helpMenuEls.helpContentEl
+    const body = $('body')
+    scrollbarButtonEl.on('mousedown', (e) => {
+      const top = Number(scrollbarButtonEl.css('top').replace('px', ''))
+      const start = e.originalEvent.clientY - top
+      const moveCallback = (e) => {
+        e.preventDefault()
+        const clientY = e.originalEvent.clientY
+        const delta = clientY - start
+        if (delta < 0) {
+          return
+        }
+        if (delta > scrollbarTrackEl.height() - scrollbarButtonEl.height()) {
+          return
+        }
+
+        scrollbarButtonEl.css('top', `${delta}px`)
+        const ratio = delta / (scrollbarTrackEl.height() - scrollbarButtonEl.height())
+        helpContent.css('transform', `translateY(calc(-${ratio * (helpContent.height() - body.height())}px))`)
+      }
+      body.on('mousemove', moveCallback)
+      const upCallback = () => {
+        body.off('mousemove', moveCallback)
+        body.off('mouseup', upCallback)
+      }
+      body.on('mouseup', upCallback)
+    })
+
+    this.helpMenuEls.helpMenu.on('mousewheel', (e) => {
+      e.preventDefault()
+      const top = Number(scrollbarButtonEl.css('top').replace('px', ''))
+      const delta = top - e.originalEvent.wheelDelta / 20
+
+      if (delta < 0) {
+        return
+      }
+      if (delta > scrollbarTrackEl.height() - scrollbarButtonEl.height()) {
+        return
+      }
+
+      scrollbarButtonEl.css('top', `${delta}px`)
+      const ratio = delta / (scrollbarTrackEl.height() - scrollbarButtonEl.height())
+      helpContent.css('transform', `translateY(calc(-${ratio * (helpContent.height() - body.height())}px))`)
+    })
+
+    body.on('keyup', (e) => {
+      e.preventDefault()
+      console.log(e.key);
+      if (this.helpMenuEls.helpMenu.data('isOpen')) {
+        if (e.key === 'Escape') {
+          this.helpMenuEls.closeButton.click()
+        }
+      }
+    })
+
+    this.helpMenuEls.helpMenu.data('isOpen', false)
+    this.helpMenuEls.helpMenu.hide()
 
     this.updateAccountBalanceUI()
 
@@ -738,7 +838,3 @@ class Loading {
 }
 
 const game = new Game()
-$('#start-button').on('click', () => {
-  game.play()
-  $('#init-menu').hide()
-})
