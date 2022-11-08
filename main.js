@@ -81,19 +81,22 @@ class Game {
   countdownTimer = null
   trainAnimationTimer = null
   constructor() {
-    this.initCanvas()
     this.initUI();
     this.initMusics();
     this.autoScale();
+    this.initCanvas().then(() => {
+      // 
+    })
   }
-  initCanvas() {
-    this.initMaterials()
+  async initCanvas() {
     this.initRenderer()
     this.initScene()
     this.initCamera()
     this.initControls()
     this.initEnvironment()
-    return this.loadModel()
+    return Promise.all(
+      [this.initMaterials(), this.loadModel()]
+    )
   }
   initUI() {
     this.producedButtonEls = [
@@ -121,7 +124,23 @@ class Game {
     </div>`)
 
     const loadingImgEl = this.loadingEl.find('img')
-    this.loadingControl = new Loading(loadingImgEl)
+
+    const parseIdx = (idx) => {
+      if (idx < 10) {
+        return `00${idx}`
+      }
+      if (idx < 100) {
+        return `0${idx}`
+      }
+      return `${idx}`
+    }
+    const getUrl = (idx) => queue.getResult(`assets.images.loading.进度条${parseIdx(idx)}.png`)
+    this.loadingControl = new Loading({
+      el: loadingImgEl,
+      getUrl,
+      time: 10_000,
+      frame: 250
+    })
 
     $('body').append(this.loadingEl)
     this.loadingEl.hide()
@@ -333,19 +352,30 @@ class Game {
     const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmremGenerator.fromScene(new RoomEnvironment()).texture;
   }
-  initMaterials() {
-    const loader = new THREE.TextureLoader();
-    Object.keys(this.allGoods).forEach(goods => {
+  async initMaterials() {
+    const goodsList = Object.keys(this.allGoods)
+    return await this.loadMaterials(goodsList, new THREE.TextureLoader())
+  }
+  async loadMaterials(goodsList, loader) {
+    return new Promise(async (resolve, reject) => {
+      loader = loader || new THREE.TextureLoader();
+      const goods = goodsList.pop()
       loader.load(`./assets/images/goods_${goods}_on@3x.png`, (texture) => {
         texture.needsUpdate = true
         this.materials[goods] = new THREE.MeshBasicMaterial({
           map: texture,
         })
+        if (goodsList.length > 0) {
+          this.loadMaterials(goodsList, loader).then(resolve)
+        }
+        resolve()
+      }, undefined, (err) => {
+        reject(err)
       })
     })
   }
   async loadModel() {
-    return Promise.all([this.loadTerrainModel(), this.loadTrainModel()])
+    return Promise.all([this.loadTerrainModel(), this.loadBaseModel(), this.loadTrainModel()])
   }
   async loadTerrainModel() {
     return new Promise((resolve) => {
@@ -377,6 +407,17 @@ class Game {
 
         const terrainMixer = this.terrainMixer = new THREE.AnimationMixer(model);
         terrainMixer.clipAction(gltf.animations[0]).play();
+        resolve(null)
+      })
+    })
+  }
+  async loadBaseModel() {
+    return new Promise((resolve) => {
+      const loader = new GLTFLoader();
+      loader.load('./assets/model/base.gltf', (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(this.modelScale, this.modelScale, this.modelScale);
+        this.scene.add(model);
         resolve(null)
       })
     })
@@ -806,21 +847,17 @@ class Timer {
 class Loading {
   el = null
   idx = 0
-  constructor(el) {
+  time = 0
+  frame = 0
+  constructor({ el, getUrl, time, frame } = {}) {
     this.el = el
-  }
-  #parseIdx = (idx) => {
-    if (idx < 10) {
-      return `00${idx}`
-    }
-    if (idx < 100) {
-      return `0${idx}`
-    }
-    return `${idx}`
+    this.getUrl = getUrl
+    this.time = time
+    this.frame = frame
   }
   play() {
     const next = () => {
-      const nextEl = queue.getResult(`assets.images.loading.进度条${this.#parseIdx(this.idx++)}.png`)
+      const nextEl = this.getUrl(this.idx++)
       if (this.el) {
         this.el.replaceWith(nextEl)
         this.el = nextEl
@@ -829,10 +866,10 @@ class Loading {
           this.idx = 0
           return
         }
-        this.timer = new Timer(next, 10_000 / 250)
+        this.timer = new Timer(next, this.time / this.frame)
       }
     }
-    this.timer = new Timer(next, 10_000 / 250)
+    this.timer = new Timer(next, this.time / this.frame)
   }
   pause() {
     this.timer.pause()

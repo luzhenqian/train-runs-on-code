@@ -25,7 +25,9 @@ genPreload('./assets', 'assets.')
 fs.writeFileSync(path.resolve(__dirname, '../preload.js'), `const queue = new createjs.LoadQueue();
 
 const loadResourceEl = $('#load-resource')
-loadResourceEl.text('开始加载资源')
+const loadResourceProcess = $('#load-resource-process')
+const loadResourceProcessBar = $('#load-resource-process-bar')
+const loadResourceProcessBarInner = $('#load-resource-progress-inner')
 
 queue.on("complete", () => {
   loadResourceEl.hide()
@@ -33,7 +35,18 @@ queue.on("complete", () => {
 });
 
 queue.on("progress", (progress) => {
-  loadResourceEl.text('游戏加载资源中 ' + Math.floor(progress.loaded * 100) + '%')
+  const parseIdx = (idx) => {
+    if (idx < 10) {
+      return \`100\${idx}\`
+    }
+    if (idx < 100) {
+      return \`10\${idx}\`
+    }
+    return \`1\${idx}\`
+  }
+  const percentage = \`\${Math.floor(progress.loaded * 100)}%\`
+  loadResourceProcessBarInner.css('width', percentage)
+  loadResourceProcess.text(percentage)
 });
 
 const resources = ${JSON.stringify(resources, null, 2)}

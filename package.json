@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/luzhenqian/train-runs-on-code#readme",
   "dependencies": {
+    "node-html-parser": "^6.1.1",
     "replaceall": "^0.1.6"
   }
 }
