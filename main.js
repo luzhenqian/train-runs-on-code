@@ -560,6 +560,7 @@ class Game {
     this.countdownTimer.pause()
     this?.trainAnimationTimer?.pause()
     this?.loadingControl?.pause()
+    this.disableGoodsControl()
   }
   resume() {
     this.isPause = false
@@ -569,6 +570,7 @@ class Game {
     this.countdownTimer.resume()
     this?.trainAnimationTimer?.resume()
     this?.loadingControl?.resume()
+    this.activeGoodsControl()
   }
   nextLoop() {
     let countdown = this.countdown;
@@ -682,6 +684,12 @@ class Game {
     this.refreshEl.css('pointer-events', 'none');
   }
   activeGoodsControl() {
+    this.goodsEls.forEach((goodsEl, idx) => {
+      goodsEl.css(
+        'background-image',
+        `url(./assets/images/goods_${this.producedGoods[idx]?.name || 'gpu'}_on@2x.png)`
+      )
+    })
     this.producedButtonEls.forEach((btnEl) => {
       btnEl.show()
     })
