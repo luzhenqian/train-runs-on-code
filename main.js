@@ -61,6 +61,8 @@ class Game {
   message = new Message()
   menuEls = {}
   helpMenuEls = {}
+  gameOverEl = null
+  restartButtonEl = null
   // arguments
   countdown = 10
   isPause = false
@@ -292,7 +294,6 @@ class Game {
 
     body.on('keyup', (e) => {
       e.preventDefault()
-      console.log(e.key);
       if (this.helpMenuEls.helpMenu.data('isOpen')) {
         if (e.key === 'Escape') {
           this.helpMenuEls.closeButton.click()
@@ -302,6 +303,11 @@ class Game {
 
     this.helpMenuEls.helpMenu.data('isOpen', false)
     this.helpMenuEls.helpMenu.hide()
+
+    this.gameOverEl = $('#game-over')
+    this.gameOverEl.hide()
+    this.restartButtonEl = $('#restart-button')
+    this.restartButtonEl.on('click', this.restart.bind(this))
 
     this.updateAccountBalanceUI()
 
@@ -463,17 +469,19 @@ class Game {
     })
   }
   arrival() {
-    this.makeProducedGoods()
-    this.makeNeededGoods()
-    this.updateProducedGoodsButtonUI()
-    this.producedButtonEls.forEach(btnEl => btnEl.show())
-    this.activeGoodsControl()
-    this.refreshEl.css('filter', 'none')
-    this.loadedGoods = [null, null, null]
-    this.updateLoadedGoodsMesh()
-    this.neededGoodsEls.forEach(neededGoodsEl => neededGoodsEl.show())
-    this.nextLoop()
-    this.tradeRecords = []
+    if (this.checkStatus()) {
+      this.makeProducedGoods()
+      this.makeNeededGoods()
+      this.updateProducedGoodsButtonUI()
+      this.producedButtonEls.forEach(btnEl => btnEl.show())
+      this.activeGoodsControl()
+      this.refreshEl.css('filter', 'none')
+      this.loadedGoods = [null, null, null]
+      this.updateLoadedGoodsMesh()
+      this.neededGoodsEls.forEach(neededGoodsEl => neededGoodsEl.show())
+      this.nextLoop()
+      this.tradeRecords = []
+    }
   }
   departure() {
     this.producedButtonEls.forEach(btnEl => btnEl.hide())
@@ -490,6 +498,13 @@ class Game {
     this.setNeedInboundPlayTimer = new Timer(() => {
       this.needInboundPlay = true
     }, 2_000)
+  }
+  checkStatus() {
+    if (this.accountBalance < 50) {
+      this.over()
+      return false
+    }
+    return true
   }
   autoScale() {
     window.addEventListener('resize', () => {
@@ -680,6 +695,10 @@ class Game {
     }
   }
   refreshProducedGoods() {
+    if (this.accountBalance + this.refreshMoney + this.energyConsumptionMoney < 0) {
+      this.message.show('余额不足', 'error')
+      return
+    }
     this.producedGoods.forEach(goods => {
       if (!goods.loaded) {
         const keys = Object.keys(this.allGoods)
@@ -786,6 +805,19 @@ class Game {
     this.accountBalance += this.refreshMoney
     this.message.show(`刷新成功！${this.refreshMoney}`, 'error')
     this.updateAccountBalanceUI()
+  }
+  over() {
+    this.gameOverEl.show()
+  }
+  restart() {
+    this.gameOverEl.hide()
+    this.accountBalance = 5_00
+    this.updateAccountBalanceUI()
+    this.makeNeededGoods()
+    this.makeProducedGoods()
+    this.updateProducedGoodsButtonUI()
+    this.bgmPlay()
+    this.play()
   }
 }
 

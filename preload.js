@@ -123,6 +123,10 @@ const resources = [
     "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/game-bg.png"
   },
   {
+    "id": "assets.images.gameover.png",
+    "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/gameover.png"
+  },
+  {
     "id": "assets.images.go.png",
     "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/go.png"
   },
@@ -1285,6 +1289,10 @@ const resources = [
   {
     "id": "assets.images.reset.png",
     "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/reset.png"
+  },
+  {
+    "id": "assets.images.restart.png",
+    "src": "https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com/./assets/images/restart.png"
   },
   {
     "id": "assets.images.rule.png",
