@@ -645,6 +645,18 @@ class Game {
       top
     });
   }
+  project3Dto2D(vector3) {
+    const vector2 = new THREE.Vector3(
+      vector3.x * this.modelScale,
+      vector3.y * this.modelScale,
+      vector3.z * this.modelScale
+    ).project(this.camera)
+    let halfWidth = window.innerWidth / 2;
+    let halfHeight = this.height / 2;
+    let left = vector2.x * halfWidth + halfWidth
+    let top = -vector2.y * halfHeight + halfHeight
+    return { left, top }
+  }
   trainAnimationPlay() {
     this.trainAnimation.play();
     this.departure()
@@ -689,7 +701,9 @@ class Game {
       this.neededGoodsEls[cityIdx].hide()
       const money = this.allGoods[goods].price
       this.accountBalance += money
-      this.message.show(`交易成功！+${money}`, 'success')
+      const vector = this.cabinMeshes[successIdx].position
+      const { left, top } = this.project3Dto2D(vector)
+      this.message.show(`交易成功！+${money}`, 'success', { left, top: top - 100 })
       this.refreshMusicPlay()
       this.updateAccountBalanceUI()
     }
@@ -803,7 +817,8 @@ class Game {
       )
     })
     this.accountBalance += this.refreshMoney
-    this.message.show(`刷新成功！${this.refreshMoney}`, 'error')
+    const { left, top } = this.refreshEl[0].getBoundingClientRect()
+    this.message.show(`刷新成功！${this.refreshMoney}`, 'error', { left, top }, 'transform: translate(50%, -100%);')
     this.updateAccountBalanceUI()
   }
   over() {
@@ -825,17 +840,18 @@ class Message {
   duration = 1600
   timers = []
 
-  show(text, type = 'info', duration = this.duration) {
+  show(text, type = 'info', position = undefined, style = '', duration = this.duration) {
     const colors = {
       success: '#C0FF00',
       error: '#FF001E',
       info: '#FFFFFF'
     }
     const color = colors[type]
+    console.log(position, 'position');
     const el = $(`<div
     id="msg"
     class="text-[2vw] text-white fixed left-[18vw] bottom-[24vh] font-[huakang] -translate-x-1/2 text-[${color}] -translate-y-[${this.timers.length * 6}vh]"
-    style="display: none;">${text}</div>`)
+    style="display: none; ${position ? `left: ${position.left}px; top: ${position.top}px; ${style}` : ''}" > ${text}</div > `)
     $('body').append(el)
     el.fadeIn()
     const timer = setTimeout(() => {
