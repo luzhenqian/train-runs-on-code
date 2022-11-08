@@ -804,6 +804,8 @@ class Timer {
 }
 
 class Loading {
+  el = null
+  idx = 0
   constructor(el) {
     this.el = el
   }
@@ -817,17 +819,18 @@ class Loading {
     return `${idx}`
   }
   play() {
-    let i = 0
     const next = () => {
-      const nextEl = queue.getResult(`assets.images.loading.进度条${this.#parseIdx(i++)}.png`)
-      this.el.replaceWith(nextEl)
-      this.el = nextEl
-      this.timer.clear()
-      if (i === 250) {
-        i = 0
-        return
+      const nextEl = queue.getResult(`assets.images.loading.进度条${this.#parseIdx(this.idx++)}.png`)
+      if (this.el) {
+        this.el.replaceWith(nextEl)
+        this.el = nextEl
+        this.timer.clear()
+        if (this.idx === 250) {
+          this.idx = 0
+          return
+        }
+        this.timer = new Timer(next, 10_000 / 250)
       }
-      this.timer = new Timer(next, 10_000 / 250)
     }
     this.timer = new Timer(next, 10_000 / 250)
   }

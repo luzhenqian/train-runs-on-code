@@ -1,0 +1,24 @@
+{
+  "name": "train-runs-on-code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node ./scripts/gen-preload.js && node ./scripts/build-juejin.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luzhenqian/train-runs-on-code.git"
+  },
+  "keywords": [],
+  "author": "LuZhenqian",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luzhenqian/train-runs-on-code/issues"
+  },
+  "homepage": "https://github.com/luzhenqian/train-runs-on-code#readme",
+  "dependencies": {
+    "replaceall": "^0.1.6"
+  }
+}

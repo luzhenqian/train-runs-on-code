@@ -1,6 +1,5 @@
 const fs = require('fs')
 const path = require('path')
-const resolve = path.join
 
 const resources = []
 const baseUrl = 'https://train-runs-on-code.oss-cn-hangzhou.aliyuncs.com'
@@ -23,7 +22,7 @@ function genPreload(path, pathKey) {
 
 genPreload('./assets', 'assets.')
 
-fs.writeFileSync('./preload.js', `const queue = new createjs.LoadQueue();
+fs.writeFileSync(path.resolve(__dirname, '../preload.js'), `const queue = new createjs.LoadQueue();
 
 const loadResourceEl = $('#load-resource')
 loadResourceEl.text('开始加载资源')
