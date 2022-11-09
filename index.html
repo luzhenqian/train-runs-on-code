@@ -16,41 +16,6 @@
   </head>
   <body class="bg-black">
     <div
-      id="init-menu"
-      class="fixed w-full h-full bg-black z-50 opacity-90 flex flex-col justify-center items-center gap-[2vw]"
-    >
-      <div
-        class="relative bg-[url('./assets/images/bggame.png')] bg-cover w-[30.5vw] aspect-[1.033/1]"
-      >
-        <div
-          id="start-button"
-          class="absolute top-[15vw] left-[5.4vw] bg-[url('./assets/images/go.png')] bg-cover w-[19.6vw] aspect-[3.6/1] flex justify-center items-center text-[2.4vw] font-[huakang] text-white font-thin cursor-pointer"
-        >
-          开始游戏
-        </div>
-        <div
-          id="help-button"
-          class="absolute top-[22vw] left-[5.4vw] bg-[url('./assets/images/rule.png')] bg-cover w-[19.6vw] aspect-[3.6/1] flex justify-center items-center text-[2.4vw] font-[huakang] text-white font-thin cursor-pointer"
-        >
-          查看规则
-        </div>
-      </div>
-
-      <div class="flex flex-col items-center">
-        <div class="text-[1.4vw] font-[huakang] text-white font-thin">
-          鸣谢：@掘金 @AMD
-        </div>
-        <div class="text-[1.4vw] font-[huakang] text-white font-thin">
-          作者：<a
-            href="https://juejin.cn/user/571401777717031"
-            class="text-blue-400"
-            >代码与野兽</a
-          >
-        </div>
-      </div>
-    </div>
-
-    <div
       id="help-menu"
       class="fixed w-full h-full bg-black z-50 opacity-90 flex flex-col justify-center items-center gap-[2vw]"
     >
@@ -465,34 +430,11 @@
         重新开始
       </div>
     </div>
-
-    <div
-      id="load-resource"
-      class="bg-[#443e37] fixed left-0 right-0 top-0 bottom-0 overflow-hidden text-white z-50 flex justify-center items-center text-[2vw]"
-    >
-      <div
-        class="flex justify-between absolute bottom-[11vh] font-[huakang] text-[1.5vw] w-[45vw]"
-      >
-        <span>正在为您更新游戏资源</span>
-        <span id="load-resource-process">0%</span>
-      </div>
-      <img src="./assets/images/loading-bg.jpg" class="w-full" />
-      <img
-        src="./assets/images/element1@2x.png"
-        class="absolute top-[1.56vw] left-[4.9vw] w-[18vw]"
-      />
-      <div
-        id="load-resource-process-bar"
-        class="flex bg-[url(./assets/images/progress@2x.png)] absolute bottom-[3.3vh] h-[6vh] w-[45vw] aspect-[13.55/1] bg-[size:100%_100%] px-[1.5vh] pt-[1.5vh] pb-[1.2vh]"
-      >
-        <span
-          id="load-resource-progress-inner"
-          class="inline-block bg-green bottom-[3.3vh] bg-green-100 w-[0px] rounded-[0.5vw] bg-gradient-to-b from-[#3551A4] to-[#2C8EC4] to-[#31CDB0]"
-        ></span>
-      </div>
-    </div>
-
-    <script src="./main.js"></script>
+    <script src="./lib/reactivity.js"></script>
+    <script src="./lib/component.js"></script>
     <script src="./preload.js"></script>
+    <script src="./components/ResourceLoading.js"></script>
+    <script src="./components/InitMenu.js"></script>
+    <script src="./main.js"></script>
   </body>
 </html>

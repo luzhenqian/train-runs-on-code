@@ -22,33 +22,4 @@ function genPreload(path, pathKey) {
 
 genPreload('./assets', 'assets.')
 
-fs.writeFileSync(path.resolve(__dirname, '../preload.js'), `const queue = new createjs.LoadQueue();
-
-const loadResourceEl = $('#load-resource')
-const loadResourceProcess = $('#load-resource-process')
-const loadResourceProcessBar = $('#load-resource-process-bar')
-const loadResourceProcessBarInner = $('#load-resource-progress-inner')
-
-queue.on("complete", () => {
-  loadResourceEl.hide()
-  new Game()
-});
-
-queue.on("progress", (progress) => {
-  const parseIdx = (idx) => {
-    if (idx < 10) {
-      return \`100\${idx}\`
-    }
-    if (idx < 100) {
-      return \`10\${idx}\`
-    }
-    return \`1\${idx}\`
-  }
-  const percentage = \`\${Math.floor(progress.loaded * 100)}%\`
-  loadResourceProcessBarInner.css('width', percentage)
-  loadResourceProcess.text(percentage)
-});
-
-const resources = ${JSON.stringify(resources, null, 2)}
-
-queue.loadManifest(resources);`)
+fs.writeFileSync(path.resolve(__dirname, '../preload.js'), `const resources = ${JSON.stringify(resources, null, 2)}`)

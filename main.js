@@ -217,13 +217,33 @@ class Game {
       })
     })
 
+    this.initMenu = new InitMenu({  
+      onStart: () => {
+        this.play()
+        // this.helpMenuEls.closeButton.off('click')
+        // this.initMenuEls.initMenu.hide()
+      }
+      ,
+      onHelp: () => {
+        console.log('help');
+        // this.initMenuEls.initMenu.hide()
+        // this.helpMenuEls.helpMenu.show()
+        // this.helpMenuEls.helpMenu.data('isOpen', true)
+        // this.helpMenuEls.closeButton.on('click', () => {
+        //   this.helpMenuEls.helpMenu.hide()
+        //   this.helpMenuEls.helpMenu.data('isOpen', true)
+        //   this.initMenuEls.initMenu.show()
+        // })
+      }
+    })
+
     this.initMenuEls = {
       initMenu: $('#init-menu'),
       startButton: $('#start-button'),
       helpButton: $('#help-button'),
     }
     this.initMenuEls.startButton.on('click', () => {
-      this.play()
+      // this.play()
       this.helpMenuEls.closeButton.off('click')
       this.initMenuEls.initMenu.hide()
     })
@@ -935,3 +955,4 @@ class Loading {
   }
 }
 
+new ResourceLoading().start()

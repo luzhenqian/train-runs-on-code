@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.js"></script>
+  </head>
+  <body>
+    <script src="./reactivity.js"></script>
+    <script>
+      $(document).ready(() => {
+        const { updateState } = new Reactivity({
+          state: {
+            count: 0,
+          },
+        });
+
+        const { updateState: up2 } = new Reactivity({
+          name: "test2",
+          state: {
+            count: 2,
+          },
+        });
+
+        const { updateState: up3 } = new Reactivity({
+          name: "test3",
+          state: {
+            count: 3,
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

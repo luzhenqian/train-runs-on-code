@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.js"></script>
+  </head>
+  <body>
+    <script>
+      var a = { a: 1 };
+      $(a).on("h", () => {
+        console.log("h1");
+      });
+      var b = { a: 2 };
+      $(b).on("h", () => {
+        console.log("h2");
+      });
+      $(b).trigger("h", "1");
+    </script>
+  </body>
+</html>
