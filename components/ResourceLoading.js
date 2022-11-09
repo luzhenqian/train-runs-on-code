@@ -1,11 +1,10 @@
-class ResourceLoading {
+class ResourceLoading extends Component {
   constructor() {
-    this.state = {
-      visible: true,
-      percentage: 0,
-    }
-    this.updateState = new Component({
-      state: this.state,
+    super({
+      state: {
+        visible: true,
+        percentage: 0,
+      },
       template: `<div
       data-show="visible"
       class="bg-[#443e37] fixed left-0 right-0 top-0 bottom-0 overflow-hidden text-white z-50 flex justify-center items-center text-[2vw]"
@@ -32,12 +31,11 @@ class ResourceLoading {
         ></span>
       </div>
     </div>`
-    }).updateState
+    });
   }
 
   start() {
     window.queue = new createjs.LoadQueue();
-
     queue.on("complete", () => {
       this.hide()
       new Game()

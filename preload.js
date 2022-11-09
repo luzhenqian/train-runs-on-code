@@ -1,5 +1,3 @@
-
-
 const resources = [
   {
     "id": "assets.audio.bgm.mp3",

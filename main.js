@@ -60,7 +60,6 @@ class Game {
   neededGoodsEls = []
   message = new Message()
   menuEls = {}
-  helpMenuEls = {}
   gameOverEl = null
   restartButtonEl = null
   // arguments
@@ -208,32 +207,12 @@ class Game {
     })
     this.menuEls.help.on('click', () => {
       this.pause()
-      this.helpMenuEls.helpMenu.show()
-      this.helpMenuEls.helpMenu.data('isOpen', true)
-      this.helpMenuEls.closeButton.on('click', () => {
-        this.helpMenuEls.helpMenu.hide()
-        this.helpMenuEls.helpMenu.data('isOpen', false)
-        this.resume()
-      })
+      new Help()
     })
 
-    this.initMenu = new InitMenu({  
+    this.initMenu = new InitMenu({
       onStart: () => {
         this.play()
-        // this.helpMenuEls.closeButton.off('click')
-        // this.initMenuEls.initMenu.hide()
-      }
-      ,
-      onHelp: () => {
-        console.log('help');
-        // this.initMenuEls.initMenu.hide()
-        // this.helpMenuEls.helpMenu.show()
-        // this.helpMenuEls.helpMenu.data('isOpen', true)
-        // this.helpMenuEls.closeButton.on('click', () => {
-        //   this.helpMenuEls.helpMenu.hide()
-        //   this.helpMenuEls.helpMenu.data('isOpen', true)
-        //   this.initMenuEls.initMenu.show()
-        // })
       }
     })
 
@@ -242,87 +221,6 @@ class Game {
       startButton: $('#start-button'),
       helpButton: $('#help-button'),
     }
-    this.initMenuEls.startButton.on('click', () => {
-      // this.play()
-      this.helpMenuEls.closeButton.off('click')
-      this.initMenuEls.initMenu.hide()
-    })
-    this.initMenuEls.helpButton.on('click', () => {
-      this.initMenuEls.initMenu.hide()
-      this.helpMenuEls.helpMenu.show()
-      this.helpMenuEls.helpMenu.data('isOpen', true)
-      this.helpMenuEls.closeButton.on('click', () => {
-        this.helpMenuEls.helpMenu.hide()
-        this.helpMenuEls.helpMenu.data('isOpen', true)
-        this.initMenuEls.initMenu.show()
-      })
-    })
-
-    this.helpMenuEls = {
-      helpMenu: $('#help-menu'),
-      closeButton: $('#help-close-button'),
-      scrollbarButtonEl: $('#scrollbar-button'),
-      scrollbarTrackEl: $('#scrollbar-track'),
-      helpContentEl: $('#help-content')
-    }
-    const scrollbarButtonEl = this.helpMenuEls.scrollbarButtonEl
-    const scrollbarTrackEl = this.helpMenuEls.scrollbarTrackEl
-    const helpContent = this.helpMenuEls.helpContentEl
-    const body = $('body')
-    scrollbarButtonEl.on('mousedown', (e) => {
-      const top = Number(scrollbarButtonEl.css('top').replace('px', ''))
-      const start = e.originalEvent.clientY - top
-      const moveCallback = (e) => {
-        e.preventDefault()
-        const clientY = e.originalEvent.clientY
-        let delta = clientY - start
-        if (delta < 0) {
-          delta = 0
-        }
-        if (delta > scrollbarTrackEl.height() - scrollbarButtonEl.height()) {
-          delta = scrollbarTrackEl.height() - scrollbarButtonEl.height()
-        }
-
-        scrollbarButtonEl.css('top', `${delta}px`)
-        const ratio = delta / (scrollbarTrackEl.height() - scrollbarButtonEl.height())
-        helpContent.css('transform', `translateY(calc(-${ratio * (helpContent.height() - body.height())}px))`)
-      }
-      body.on('mousemove', moveCallback)
-      const upCallback = () => {
-        body.off('mousemove', moveCallback)
-        body.off('mouseup', upCallback)
-      }
-      body.on('mouseup', upCallback)
-    })
-
-    this.helpMenuEls.helpMenu.on('mousewheel', (e) => {
-      e.preventDefault()
-      const top = Number(scrollbarButtonEl.css('top').replace('px', ''))
-      let delta = top - e.originalEvent.wheelDelta / 20
-
-      if (delta < 0) {
-        delta = 0
-      }
-      if (delta > scrollbarTrackEl.height() - scrollbarButtonEl.height()) {
-        delta = scrollbarTrackEl.height() - scrollbarButtonEl.height()
-      }
-
-      scrollbarButtonEl.css('top', `${delta}px`)
-      const ratio = delta / (scrollbarTrackEl.height() - scrollbarButtonEl.height())
-      helpContent.css('transform', `translateY(calc(-${ratio * (helpContent.height() - body.height())}px))`)
-    })
-
-    body.on('keyup', (e) => {
-      e.preventDefault()
-      if (this.helpMenuEls.helpMenu.data('isOpen')) {
-        if (e.key === 'Escape') {
-          this.helpMenuEls.closeButton.click()
-        }
-      }
-    })
-
-    this.helpMenuEls.helpMenu.data('isOpen', false)
-    this.helpMenuEls.helpMenu.hide()
 
     this.gameOverEl = $('#game-over')
     this.gameOverEl.hide()
@@ -875,7 +773,6 @@ class Message {
       info: '#FFFFFF'
     }
     const color = colors[type]
-    console.log(position, 'position');
     const el = $(`<div
     id="msg"
     class="text-[2vw] text-white fixed left-[18vw] bottom-[24vh] font-[huakang] -translate-x-1/2 text-[${color}] -translate-y-[${this.timers.length * 6}vh]"

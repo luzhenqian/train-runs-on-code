@@ -1,16 +1,23 @@
-class InitMenu {
-  constructor({ onStart, onHelp }) {
-    this.state = {
-      visible: true,
-    }
-    this.updateState = new Component({
-      state: this.state,
+class InitMenu extends Component {
+  constructor({ onStart, onHelp } = {}) {
+    super({
+      state: {
+        visible: true,
+      },
       methods: {
-        onStart() {
-          onStart()
+        onStart: () => {
+          this.hide()
+          onStart?.()
         },
-        onHelp() {
-          onHelp()
+        onHelp: () => {
+          this.hide()
+          const help = new Help({
+            onClose: () => {
+              help.hide()
+              this.show()
+            }
+          })
+          onHelp?.()
         }
       },
       template: `<div
@@ -51,10 +58,14 @@ class InitMenu {
       </div>
       </div>
       `
-    }).updateState
+    })
   }
 
   hide() {
     this.updateState('visible', false)
+  }
+
+  show() {
+    this.updateState('visible', true)
   }
 }
