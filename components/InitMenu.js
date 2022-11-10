@@ -27,8 +27,9 @@ class InitMenu extends Component {
       template: `<div
       data-show="visible"
       id="init-menu"
-      class="fixed w-full h-full bg-black z-50 opacity-90 flex flex-col justify-center items-center gap-[2vw]"
+      class="fixed w-full h-full z-50 flex flex-col justify-center items-center gap-[2vw]"
       >
+      <div class="absolute w-full h-full bg-black opacity-90"></div>
       <div
         class="relative bg-[url('./assets/images/bggame.png')] bg-cover w-[30.5vw] aspect-[1.033/1]"
       >

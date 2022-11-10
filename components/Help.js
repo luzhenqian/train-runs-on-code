@@ -64,8 +64,9 @@ class Help extends Component {
       template: `<div
       data-show="visible"
       on-mousewheel="scrollbarMouseWheel"
-      class="fixed top-0 bottom-0 left-0 right-0 bg-black z-50 opacity-90 flex flex-col justify-center items-center gap-[2vw]"
+      class="fixed top-0 bottom-0 left-0 right-0 z-50 flex flex-col justify-center items-center gap-[2vw]"
     >
+      <div class="absolute w-full h-full bg-black opacity-90"></div>
       <div
         class="relative bg-[url('./assets/images/Div@2x.png')] bg-cover h-[81.5vh] aspect-[1.25/1] pl-[3.125vw] pr-[1.67vw]"
       >
