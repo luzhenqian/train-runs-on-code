@@ -7,6 +7,8 @@ class Main extends Component {
         atTheStation: true,
         carryMoney: -5,
         loadedGoods: [],
+        refreshMoney: -20,
+        energyConsumptionMoney: -50
       },
       methods: {
         carry: (e) => {
@@ -45,8 +47,24 @@ class Main extends Component {
           this.updateState('accountBalance', this.state.accountBalance + this.state.carryMoney)
           this.Music.replay('carry')
         },
-        refresh: () => {
-
+        refreshProducedGoods: () => {
+          if (this.state.accountBalance + this.state.refreshMoney + this.state.energyConsumptionMoney < 0) {
+            this.Message.show('余额不足', 'error')
+            return
+          }
+          const newProducedGoods = deepClone(this.state.producedGoods.map(goods => {
+            if (!goods.loaded) {
+              const keys = Object.keys(allGoods)
+              const len = keys.length
+              goods.name = keys[Math.floor(Math.random() * len)]
+            }
+            return goods
+          }))
+          const { left, top } = this.refs.refreshButton[0].getBoundingClientRect()
+          this.Message.show(`刷新成功！${this.state.refreshMoney}`, 'error', { left, top }, 'transform: translate(50%, -100%);')
+          this.updateState('producedGoods', newProducedGoods)
+          this.updateState('accountBalance', this.state.accountBalance + this.state.refreshMoney)
+          this.Music.replay('refresh')
         }
       }
       ,
@@ -80,14 +98,16 @@ class Main extends Component {
         }
 
       <div
+        ref="refreshButton"
         class="absolute right-[12vw] bottom-[2.6vh] w-[16.7vw] bg-[url('./assets/images/reset.png')] bg-cover aspect-[1/1] z-10 cursor-pointer"
         ${state.atTheStation ? '' : 'style="filter: grayscale(100%); pointer-events:none;'}
+        on-click="refreshProducedGoods"
       ></div>
 
       <div
         class="absolute left-[86vw] bottom-[10vh] text-white font-[huakang] z-10"
       >
-        <div id="refresh-money" class="text-[5vw]"></div>
+        <div id="refresh-money" class="text-[5vw]">${-state.refreshMoney}￥</div>
         <div class="text-[1.55vw]">码上掘金</div>
       </div>
 
@@ -106,6 +126,7 @@ class Main extends Component {
     })
 
     this.Music = new Music();
+    this.Message = new Message()
 
   }
 

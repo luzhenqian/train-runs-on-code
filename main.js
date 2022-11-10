@@ -49,14 +49,9 @@ class Game {
   }
   materials = {}
   tradeRecords = []
-  loadingControl = null
   // ui elements
-  producedButtonEls = []
   goodsEls = []
-  refreshEl = null
-  accountBalanceEl = null
   neededGoodsEls = []
-  message = new Message()
   menuEls = {}
   gameOverEl = null
   restartButtonEl = null
@@ -66,7 +61,6 @@ class Game {
   accountBalance = 500
   energyConsumptionMoney = -50
   carryMoney = -5
-  refreshMoney = -20
   // meshes
   cityMeshes = []
   cabinMeshes = []
@@ -103,10 +97,6 @@ class Game {
       $("#needed-goods-four"),
       $("#needed-goods-five")
     ]
-    this.accountBalanceEl = $('#account-balance')
-    this.refreshEl = $('#refresh')
-    this.refreshEl.on('click', this.refreshProducedGoods.bind(this))
-    $('#refresh-money').text(`${-this.refreshMoney}￥`)
 
     // this.menuEls = {
     //   'music': $('#bgm'),
@@ -298,9 +288,8 @@ class Game {
   }
   departure() {
     this.accountBalance += this.energyConsumptionMoney
-    this.message.show(`消耗能源！${this.energyConsumptionMoney}`, 'error')
+    // this.message.show(`消耗能源！${this.energyConsumptionMoney}`, 'error')
     this.outboundPlay()
-    this.updateAccountBalanceUI()
     if (this.setNeedInboundPlayTimer !== null) {
       this.setNeedInboundPlayTimer.clear()
     }
@@ -462,25 +451,9 @@ class Game {
       this.accountBalance += money
       const vector = this.cabinMeshes[successIdx].position
       const { left, top } = this.project3Dto2D(vector)
-      this.message.show(`交易成功！+${money}`, 'success', { left, top: top - 100 })
+      // this.message.show(`交易成功！+${money}`, 'success', { left, top: top - 100 })
       this.refreshMusicPlay()
-      this.updateAccountBalanceUI()
     }
-  }
-  refreshProducedGoods() {
-    if (this.accountBalance + this.refreshMoney + this.energyConsumptionMoney < 0) {
-      this.message.show('余额不足', 'error')
-      return
-    }
-    this.producedGoods.forEach(goods => {
-      if (!goods.loaded) {
-        const keys = Object.keys(this.allGoods)
-        const len = keys.length
-        goods.name = keys[Math.floor(Math.random() * len)]
-      }
-    })
-    this.refreshMusicPlay()
-    this.updateProducedGoodsUI()
   }
   updateLoadedGoodsMesh() {
     this.goodsMeshes.forEach((goodsMesh, idx) => {
@@ -493,9 +466,6 @@ class Game {
       goodsMesh.visible = true
     })
   }
-  updateAccountBalanceUI() {
-    this.accountBalanceEl.text(`${this.accountBalance}￥`)
-  }
   updateProducedGoodsUI() {
     this.goodsEls.forEach((goodsEl, idx) => {
       const status = this.producedGoods[idx].loaded ? 'off' : 'on'
@@ -504,10 +474,6 @@ class Game {
         `url(./assets/images/goods_${this.producedGoods[idx].name}_${status}@2x.png)`
       )
     })
-    this.accountBalance += this.refreshMoney
-    const { left, top } = this.refreshEl[0].getBoundingClientRect()
-    this.message.show(`刷新成功！${this.refreshMoney}`, 'error', { left, top }, 'transform: translate(50%, -100%);')
-    this.updateAccountBalanceUI()
   }
   over() {
     this.gameOverEl.show()
@@ -515,7 +481,6 @@ class Game {
   restart() {
     this.gameOverEl.hide()
     this.accountBalance = 5_00
-    this.updateAccountBalanceUI()
     this.makeNeededGoods()
     this.makeProducedGoods()
     this.bgmPlay()
