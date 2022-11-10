@@ -37,7 +37,7 @@ class ResourceLoading extends Component {
   start() {
     window.queue = new createjs.LoadQueue();
     queue.on("complete", () => {
-      this.hide()
+      this.unmount()
       new Game()
     });
 
