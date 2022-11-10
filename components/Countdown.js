@@ -63,6 +63,16 @@ class Countdown extends Component {
     this.loadingControl.play()
   }
 
+  pause() {
+    this.loadingControl.pause()
+    this.timer.pause()
+  }
+
+  resume() {
+    this.loadingControl.resume()
+    this.timer.resume()
+  }
+
   hide() {
     this.updateState('visible', false)
   }

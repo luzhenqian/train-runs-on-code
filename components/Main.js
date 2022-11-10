@@ -127,7 +127,28 @@ class Main extends Component {
 
     this.Music = new Music();
     this.Message = new Message()
-
+    this.Menu = new Menu({
+      onPause: (isPause) => {
+        if (isPause) {
+          this.Countdown.pause()
+        } else {
+          this.Countdown.resume()
+        }
+      },
+      onBgmPlay: (isPlay) => {
+        if (isPlay) {
+          this.Music.play('bgm')
+        } else {
+          this.Music.pause('bgm')
+        }
+      },
+      onHelp: () => {
+        if (!this.Help) {
+          this.Help = new Help()
+        }
+        this.Help.show()
+      }
+    })
   }
 
   nextLoop() {

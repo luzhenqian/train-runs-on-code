@@ -1,7 +1,6 @@
 class Game {
   // ui elements
   goodsEls = []
-  menuEls = {}
   gameOverEl = null
   restartButtonEl = null
   // arguments
@@ -13,19 +12,9 @@ class Game {
   constructor() {
     this.initUI();
     this.Scene = new Scene();
-    // this.initCanvas().then(() => {
-    //   // 
-    // })
   }
-  
-  initUI() {
 
-    // this.menuEls = {
-    //   'music': $('#bgm'),
-    //   'pause': $('#pause'),
-    //   'pauseText': $('#pause-text'),
-    //   'help': $('#help'),
-    // }
+  initUI() {
 
     // this.menuEls.music.on('click', this.bgmPlay.bind(this))
     // this.menuEls.pause.on('click', () => {
@@ -43,6 +32,7 @@ class Game {
         this.Main.Music.play('bgm')
       }
     })
+
 
     this.gameOverEl = $('#game-over')
     this.gameOverEl.hide()

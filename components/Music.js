@@ -1,5 +1,5 @@
 class Music extends Component {
-  constructor({ onClose } = {}) {
+  constructor() {
     super({
       template: `<div>
       <audio ref='bgm' src="./assets/audio/bgm.mp3" loop="loop"></audio>
