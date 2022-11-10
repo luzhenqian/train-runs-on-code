@@ -22,7 +22,6 @@ class Main extends Component {
             // this.accountBalance += this.carryMoney
             // this.message.show(`卸载成功！${this.carryMoney}`, 'error')
             // this.updateAccountBalanceUI()
-            this.updateState('accountBalance', this.state.accountBalance + this.state.carryMoney)
           }
           // 选择货物
           else {
@@ -43,7 +42,11 @@ class Main extends Component {
             //   }
             // }
           }
-          // TODO: 播放音乐
+          this.updateState('accountBalance', this.state.accountBalance + this.state.carryMoney)
+          this.Music.replay('carry')
+        },
+        refresh: () => {
+
         }
       }
       ,
@@ -54,7 +57,7 @@ class Main extends Component {
         <span
           ref="accountBalance"
           class="absolute text-white left-[50%] top-[50%] translate-x-[-2.3vw] translate-y-[-60%] text-[2.4vw] font-[huakang]"
-        >
+        >${state.accountBalance}￥
         </span>
       </div>
 
@@ -78,7 +81,7 @@ class Main extends Component {
 
       <div
         class="absolute right-[12vw] bottom-[2.6vh] w-[16.7vw] bg-[url('./assets/images/reset.png')] bg-cover aspect-[1/1] z-10 cursor-pointer"
-        id="refresh"
+        ${state.atTheStation ? '' : 'style="filter: grayscale(100%); pointer-events:none;'}
       ></div>
 
       <div
@@ -101,6 +104,8 @@ class Main extends Component {
         // this.trainAnimationPlay()
       }
     })
+
+    this.Music = new Music();
 
   }
 

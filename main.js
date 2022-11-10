@@ -73,7 +73,6 @@ class Game {
   loadedGoods = [null, null, null]
   neededGoods = []
   producedGoods = []
-  musics = {}
   portMesh = null
   needInboundPlay = false
   setNeedInboundPlayTimer = null
@@ -81,7 +80,6 @@ class Game {
   trainAnimationTimer = null
   constructor() {
     this.initUI();
-    this.initMusics();
     this.autoScale();
     this.initCanvas().then(() => {
       // 
@@ -110,51 +108,34 @@ class Game {
     this.refreshEl.on('click', this.refreshProducedGoods.bind(this))
     $('#refresh-money').text(`${-this.refreshMoney}￥`)
 
-    this.menuEls = {
-      'music': $('#bgm'),
-      'pause': $('#pause'),
-      'pauseText': $('#pause-text'),
-      'help': $('#help'),
-    }
+    // this.menuEls = {
+    //   'music': $('#bgm'),
+    //   'pause': $('#pause'),
+    //   'pauseText': $('#pause-text'),
+    //   'help': $('#help'),
+    // }
 
-    this.menuEls.music.on('click', this.bgmPlay.bind(this))
-    this.menuEls.pause.on('click', () => {
-      this.isPause ? this.resume() : this.pause()
-    })
-    this.menuEls.help.on('click', () => {
-      this.pause()
-      new Help()
-    })
+    // this.menuEls.music.on('click', this.bgmPlay.bind(this))
+    // this.menuEls.pause.on('click', () => {
+    //   this.isPause ? this.resume() : this.pause()
+    // })
+    // this.menuEls.help.on('click', () => {
+    //   this.pause()
+    //   new Help()
+    // })
 
     this.Main = new Main()
     this.initMenu = new InitMenu({
       onStart: () => {
         this.play()
+        this.Main.Music.play('bgm')
       }
     })
-
-    this.initMenuEls = {
-      initMenu: $('#init-menu'),
-      startButton: $('#start-button'),
-      helpButton: $('#help-button'),
-    }
 
     this.gameOverEl = $('#game-over')
     this.gameOverEl.hide()
     this.restartButtonEl = $('#restart-button')
     this.restartButtonEl.on('click', this.restart.bind(this))
-
-    this.updateAccountBalanceUI()
-
-    this.disableGoodsControl()
-  }
-  initMusics() {
-    this.musics.bgm = $(`<audio src="./assets/audio/bgm.mp3" loop="loop"></audio>`)
-    this.musics.load = $(`<audio src="./assets/audio/load.mp3"></audio>`)
-    this.musics.refresh = $(`<audio src="./assets/audio/refresh.mp3"></audio>`)
-    this.musics.inbound = $(`<audio src="./assets/audio/inbound.mp3"></audio>`)
-    this.musics.outbound = $(`<audio src="./assets/audio/outbound.mp3"></audio>`)
-    $('body').append(...Object.values(this.musics))
   }
   initRenderer() {
     // Create a WebGL renderer
@@ -308,7 +289,6 @@ class Game {
       this.makeProducedGoods()
       this.makeNeededGoods()
       this.activeGoodsControl()
-      this.refreshEl.css('filter', 'none')
       this.loadedGoods = [null, null, null]
       this.updateLoadedGoodsMesh()
       this.neededGoodsEls.forEach(neededGoodsEl => neededGoodsEl.show())
@@ -317,9 +297,6 @@ class Game {
     }
   }
   departure() {
-    this.disableGoodsControl()
-    this.refreshEl.css('filter', 'grayscale(100%)')
-
     this.accountBalance += this.energyConsumptionMoney
     this.message.show(`消耗能源！${this.energyConsumptionMoney}`, 'error')
     this.outboundPlay()
@@ -381,7 +358,6 @@ class Game {
     this.makeProducedGoods()
     this.makeNeededGoods()
     this.nextLoop()
-    this.bgmPlay()
     this.animate()
   }
   pause() {
@@ -392,7 +368,6 @@ class Game {
     this.countdownTimer.pause()
     this?.trainAnimationTimer?.pause()
     this?.loadingControl?.pause()
-    this.disableGoodsControl()
   }
   resume() {
     this.isPause = false
@@ -468,19 +443,6 @@ class Game {
       this.arrival()
     });
   }
-  disableGoodsControl() {
-    this.goodsEls.forEach((goodsEl, idx) => {
-      goodsEl.css(
-        'background-image',
-        `url(./assets/images/goods_${this.producedGoods[idx]?.name || 'gpu'}_off@2x.png)`
-      )
-    })
-    this.refreshEl.css(
-      'filter',
-      'grayscale(100%)'
-    )
-    this.refreshEl.css('pointer-events', 'none');
-  }
   activeGoodsControl() {
     this.goodsEls.forEach((goodsEl, idx) => {
       goodsEl.css(
@@ -488,12 +450,6 @@ class Game {
         `url(./assets/images/goods_${this.producedGoods[idx]?.name || 'gpu'}_on@2x.png)`
       )
     })
-
-    this.refreshEl.css(
-      'filter',
-      'none'
-    )
-    this.refreshEl.css('pointer-events', 'auto');
   }
   trade(cityIdx) {
     const successIdx = this.loadedGoods.findIndex(goods => goods === this.neededGoods[cityIdx])
@@ -525,32 +481,6 @@ class Game {
     })
     this.refreshMusicPlay()
     this.updateProducedGoodsUI()
-  }
-  refreshMusicPlay() {
-    const refreshMusicPlayer = this.musics.refresh[0]
-    refreshMusicPlayer.currentTime = 0
-    refreshMusicPlayer.play();
-  }
-  bgmPlay() {
-    const bgmPlayer = this.musics.bgm[0]
-    if (bgmPlayer.paused) {
-      bgmPlayer.currentTime = 0
-      bgmPlayer.play();
-      this.menuEls.music.attr('src', './assets/images/music_off@2x.png')
-    } else {
-      bgmPlayer.pause();
-      this.menuEls.music.attr('src', './assets/images/music_on@2x.png')
-    }
-  }
-  inboundPlay() {
-    const inboundPlayer = this.musics.inbound[0]
-    inboundPlayer.currentTime = 0
-    inboundPlayer.play();
-  }
-  outboundPlay() {
-    const outboundPlayer = this.musics.outbound[0]
-    outboundPlayer.currentTime = 0
-    outboundPlayer.play();
   }
   updateLoadedGoodsMesh() {
     this.goodsMeshes.forEach((goodsMesh, idx) => {
