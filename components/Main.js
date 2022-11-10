@@ -83,7 +83,7 @@ class Main extends Component {
         class="flex flex-col items-center absolute bottom-[7.7vh] left-[${33 + idx * 13}vw]"
       >
         <div ref="producedGoods" class="bg-cover w-[9.6vw] aspect-[1/1]"
-          style='background-image: url(./assets/images/goods_${goods.name}_${goods.loaded ? 'off' : 'on'}@2x.png);'></div>
+          style='background-image: url(./assets/images/goods_${goods.name}_${goods.loaded || !state.atTheStation ? 'off' : 'on'}@2x.png);'></div>
         <div
           ref="producedGoodsButton"
           class="text-[1.35vw] md:scale-75 text-white w-[5vw] aspect-[2/1] flex justify-center items-center font-[huakang] aspect-[2/1] 
@@ -120,7 +120,7 @@ class Main extends Component {
 
     this.Countdown = new Countdown({
       onOver: () => {
-        // TODO
+        this.updateState('atTheStation', false)
         // this.trainAnimationPlay()
       }
     })

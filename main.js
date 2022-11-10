@@ -15,16 +15,6 @@ class Game {
   }
 
   initUI() {
-
-    // this.menuEls.music.on('click', this.bgmPlay.bind(this))
-    // this.menuEls.pause.on('click', () => {
-    //   this.isPause ? this.resume() : this.pause()
-    // })
-    // this.menuEls.help.on('click', () => {
-    //   this.pause()
-    //   new Help()
-    // })
-
     this.Main = new Main()
     this.initMenu = new InitMenu({
       onStart: () => {
@@ -32,7 +22,6 @@ class Game {
         this.Main.Music.play('bgm')
       }
     })
-
 
     this.gameOverEl = $('#game-over')
     this.gameOverEl.hide()
@@ -43,11 +32,8 @@ class Game {
   arrival() {
     if (this.checkStatus()) {
       this.makeProducedGoods()
-      // this.makeNeededGoods()
-      this.activeGoodsControl()
       this.loadedGoods = [null, null, null]
       this.updateLoadedGoodsMesh()
-      // this.neededGoodsEls.forEach(neededGoodsEl => neededGoodsEl.show())
       this.nextLoop()
       this.tradeRecords = []
     }
@@ -71,9 +57,7 @@ class Game {
     return true
   }
   play() {
-    this.activeGoodsControl()
     this.makeProducedGoods()
-    // this.makeNeededGoods()
     this.nextLoop()
   }
   pause() {
@@ -93,7 +77,6 @@ class Game {
     this.countdownTimer.resume()
     this?.trainAnimationTimer?.resume()
     this?.loadingControl?.resume()
-    this.activeGoodsControl()
   }
   nextLoop() {
     this.Main.nextLoop()
@@ -109,14 +92,6 @@ class Game {
       this.arrival()
     });
   }
-  activeGoodsControl() {
-    this.goodsEls.forEach((goodsEl, idx) => {
-      goodsEl.css(
-        'background-image',
-        `url(./assets/images/goods_${this.producedGoods[idx]?.name || 'gpu'}_on@2x.png)`
-      )
-    })
-  }
   trade(cityIdx) {
     const successIdx = this.loadedGoods.findIndex(goods => goods === this.neededGoods[cityIdx])
     if (successIdx > -1) {
@@ -131,15 +106,6 @@ class Game {
       // this.message.show(`交易成功！+${money}`, 'success', { left, top: top - 100 })
       this.refreshMusicPlay()
     }
-  }
-  updateProducedGoodsUI() {
-    this.goodsEls.forEach((goodsEl, idx) => {
-      const status = this.producedGoods[idx].loaded ? 'off' : 'on'
-      goodsEl.css(
-        'background-image',
-        `url(./assets/images/goods_${this.producedGoods[idx].name}_${status}@2x.png)`
-      )
-    })
   }
   over() {
     this.gameOverEl.show()
