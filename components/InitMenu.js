@@ -7,18 +7,20 @@ class InitMenu extends Component {
       methods: {
         onStart: () => {
           this.unmount()
-          this?.help?.unmount()
+          this?.Help?.unmount()
           onStart?.()
         },
         onHelp: () => {
           this.hide()
-          this.help = new Help({
-            onClose: () => {
-              this.help.hide()
-              this.show()
-              console.log('123')
-            }
-          })
+          if (!this.Help) {
+            this.Help = new Help({
+              onClose: () => {
+                this.Help.hide()
+                this.show()
+              }
+            })
+          }
+          this.Help.show()
           onHelp?.()
         }
       },

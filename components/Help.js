@@ -321,6 +321,7 @@ class Help extends Component {
 `
     })
 
+    // TODO: unmount when off the event
     $('body').on('keyup', (e) => {
       e.preventDefault()
       if (e.key === 'Escape') {
@@ -332,5 +333,9 @@ class Help extends Component {
 
   hide() {
     this.updateState('visible', false)
+  }
+
+  show() {
+    this.updateState('visible', true)
   }
 }

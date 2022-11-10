@@ -53,8 +53,6 @@ class Game {
   // ui elements
   producedButtonEls = []
   goodsEls = []
-  countdownEl = null
-  loadingEl = null
   refreshEl = null
   accountBalanceEl = null
   neededGoodsEls = []
@@ -100,53 +98,6 @@ class Game {
     )
   }
   initUI() {
-    this.producedButtonEls = [
-      $('#btn-one'),
-      $('#btn-two'),
-      $('#btn-three'),
-    ]
-    this.goodsEls = [
-      $('#goods-one'),
-      $('#goods-two'),
-      $('#goods-three'),
-    ]
-
-    this.loadingEl = $(`<div
-      id="loading"
-      class="flex flex-col items-center fixed top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-10"
-    >
-      <span class="text-white font-[huakang] text-[2.8vw]"
-        >码上掘金 即将到来</span
-      >
-      <img />
-      <span id="countdown" class="text-white font-[huakang] text-[2.8vw]"
-        >10s</span
-      >
-    </div>`)
-
-    const loadingImgEl = this.loadingEl.find('img')
-
-    const parseIdx = (idx) => {
-      if (idx < 10) {
-        return `00${idx}`
-      }
-      if (idx < 100) {
-        return `0${idx}`
-      }
-      return `${idx}`
-    }
-    const getUrl = (idx) => queue.getResult(`assets.images.loading.进度条${parseIdx(idx)}.png`)
-    this.loadingControl = new Loading({
-      el: loadingImgEl,
-      getUrl,
-      time: 10_000,
-      frame: 250
-    })
-
-    $('body').append(this.loadingEl)
-    this.loadingEl.hide()
-    this.countdownEl = $('#countdown')
-
     this.neededGoodsEls = [
       $("#needed-goods-one"),
       $("#needed-goods-two"),
@@ -158,41 +109,6 @@ class Game {
     this.refreshEl = $('#refresh')
     this.refreshEl.on('click', this.refreshProducedGoods.bind(this))
     $('#refresh-money').text(`${-this.refreshMoney}￥`)
-
-    // 绑定装货/卸货事件
-    this.producedButtonEls.forEach((btnEl, idx) => {
-      btnEl.on('click', () => {
-        // 卸载货物
-        if (this.producedGoods[idx].loaded) {
-          this.loadedGoods[this.producedGoods[idx].cabin] = null
-          this.producedGoods[idx].loaded = false
-
-          this.accountBalance += this.carryMoney
-          this.message.show(`卸载成功！${this.carryMoney}`, 'error')
-          this.updateAccountBalanceUI()
-        }
-        // 选择货物
-        else {
-          const goods = this.producedGoods[idx].name
-          for (let i = 0; i < this.loadedGoods.length; i++) {
-            if (!!!this.loadedGoods[i]) {
-              this.loadedGoods[i] = goods
-              this.producedGoods[idx].cabin = i
-              this.producedGoods[idx].loaded = true
-
-              this.accountBalance += this.carryMoney
-              this.message.show(`搬运成功！${this.carryMoney}`, 'error')
-              this.updateAccountBalanceUI()
-              break;
-            }
-          }
-        }
-
-        this.musics.load[0].play()
-        this.updateProducedGoodsButtonUI()
-        this.updateLoadedGoodsMesh()
-      })
-    })
 
     this.menuEls = {
       'music': $('#bgm'),
@@ -210,6 +126,7 @@ class Game {
       new Help()
     })
 
+    this.Main = new Main()
     this.initMenu = new InitMenu({
       onStart: () => {
         this.play()
@@ -390,8 +307,6 @@ class Game {
     if (this.checkStatus()) {
       this.makeProducedGoods()
       this.makeNeededGoods()
-      this.updateProducedGoodsButtonUI()
-      this.producedButtonEls.forEach(btnEl => btnEl.show())
       this.activeGoodsControl()
       this.refreshEl.css('filter', 'none')
       this.loadedGoods = [null, null, null]
@@ -402,7 +317,6 @@ class Game {
     }
   }
   departure() {
-    this.producedButtonEls.forEach(btnEl => btnEl.hide())
     this.disableGoodsControl()
     this.refreshEl.css('filter', 'grayscale(100%)')
 
@@ -491,41 +405,10 @@ class Game {
     this.activeGoodsControl()
   }
   nextLoop() {
-    let countdown = this.countdown;
-    this.countdownEl.text(`${countdown}s`)
-    this.loadingEl.show()
-    // this.loadingEl.find('img').attr('src', this.loadingImage.src);
-    this.loadingControl.play()
-    const cbFn = () => {
-      this.countdownEl.text(`${countdown -= 1}s`)
-      if (countdown === 0) {
-        this.loadingEl.hide()
-        this.trainAnimationPlay()
-        this.countdownTimer.clear()
-        return
-      }
-
-      this?.countdownTimer?.clear()
-      this.countdownTimer = new Timer(cbFn, 1_000)
-    }
-    this?.countdownTimer?.clear()
-    this.countdownTimer = new Timer(cbFn, 1_000)
+    this.Main.nextLoop()
   }
   makeProducedGoods() {
-    for (let i = 0; i < 3; i++) {
-      let goods = Object.keys(this.allGoods)[Math.floor(Math.random() * Object.keys(this.allGoods).length)]
-      this.producedGoods[i] = {
-        name: goods,
-        loaded: false
-      }
-      this.goodsEls[i].css(
-        'background-image',
-        `url(./assets/images/goods_${goods}_on@2x.png)`)
-      this.goodsEls[i].data(
-        'goods',
-        goods
-      )
-    }
+    this.Main.makeProducedGoods()
   }
   makeNeededGoods() {
     const len = Object.keys(this.allGoods).length
@@ -592,9 +475,6 @@ class Game {
         `url(./assets/images/goods_${this.producedGoods[idx]?.name || 'gpu'}_off@2x.png)`
       )
     })
-    this.producedButtonEls.forEach((btnEl) => {
-      btnEl.hide()
-    })
     this.refreshEl.css(
       'filter',
       'grayscale(100%)'
@@ -607,9 +487,6 @@ class Game {
         'background-image',
         `url(./assets/images/goods_${this.producedGoods[idx]?.name || 'gpu'}_on@2x.png)`
       )
-    })
-    this.producedButtonEls.forEach((btnEl) => {
-      btnEl.show()
     })
 
     this.refreshEl.css(
@@ -686,51 +563,6 @@ class Game {
       goodsMesh.visible = true
     })
   }
-  updateProducedGoodsButtonUI() {
-    this.producedGoods.forEach((goods, idx) => {
-      if (goods.loaded) {
-        this.goodsEls[idx].css(
-          'background-image',
-          `url(./assets/images/goods_${goods.name}_off@2x.png)`
-        )
-        this.producedButtonEls[idx].css(
-          'background-image',
-          'url("./assets/images/reselect-btn.png")'
-        )
-        this.producedButtonEls[idx].hover(
-          () => {
-            this.producedButtonEls[idx]
-              .css('background-image', 'url("./assets/images/reselect-btn-hover.png")')
-          },
-          () => {
-            this.producedButtonEls[idx]
-              .css('background-image', 'url("./assets/images/reselect-btn.png")')
-          }
-        )
-        this.producedButtonEls[idx].text('卸货')
-      } else {
-        this.goodsEls[idx].css(
-          'background-image',
-          `url(./assets/images/goods_${goods.name}_on@2x.png)`
-        )
-        this.producedButtonEls[idx].css(
-          'background-image',
-          'url("./assets/images/btn.png")'
-        )
-        this.producedButtonEls[idx].hover(
-          () => {
-            this.producedButtonEls[idx]
-              .css('background-image', 'url("./assets/images/btn-hover.png")')
-          },
-          () => {
-            this.producedButtonEls[idx]
-              .css('background-image', 'url("./assets/images/btn.png")')
-          },
-        )
-        this.producedButtonEls[idx].text('装货')
-      }
-    })
-  }
   updateAccountBalanceUI() {
     this.accountBalanceEl.text(`${this.accountBalance}￥`)
   }
@@ -756,7 +588,6 @@ class Game {
     this.updateAccountBalanceUI()
     this.makeNeededGoods()
     this.makeProducedGoods()
-    this.updateProducedGoodsButtonUI()
     this.bgmPlay()
     this.play()
   }
@@ -786,69 +617,6 @@ class Message {
       el.remove()
     }, duration)
     this.timers.push(timer)
-  }
-}
-
-class Timer {
-  timerId = null
-  start = null
-  remaining = 0
-  callback = () => { }
-  constructor(callback, delay) {
-    this.callback = callback
-    this.remaining = delay;
-    this.resume();
-  }
-  pause() {
-    window.clearTimeout(this.timerId);
-    this.timerId = null;
-    this.remaining -= Date.now() - this.start;
-  }
-  resume() {
-    if (this.timerId) {
-      return;
-    }
-    this.start = Date.now();
-    this.timerId = window.setTimeout(this.callback, this.remaining);
-  }
-  clear() {
-    window.clearTimeout(this.timerId);
-    this.timerId = null;
-  }
-}
-
-class Loading {
-  el = null
-  idx = 0
-  time = 0
-  frame = 0
-  constructor({ el, getUrl, time, frame } = {}) {
-    this.el = el
-    this.getUrl = getUrl
-    this.time = time
-    this.frame = frame
-  }
-  play() {
-    const next = () => {
-      const nextEl = this.getUrl(this.idx++)
-      if (this.el) {
-        this.el.replaceWith(nextEl)
-        this.el = nextEl
-        this.timer.clear()
-        if (this.idx === 250) {
-          this.idx = 0
-          return
-        }
-        this.timer = new Timer(next, this.time / this.frame)
-      }
-    }
-    this.timer = new Timer(next, this.time / this.frame)
-  }
-  pause() {
-    this.timer.pause()
-  }
-  resume() {
-    this.timer.resume()
   }
 }
 
