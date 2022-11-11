@@ -6,9 +6,9 @@ class Main extends Component {
         producedGoods: [],
         atTheStation: true,
         carryMoney: -5,
-        loadedGoods: [],
         refreshMoney: -20,
-        energyConsumptionMoney: -50
+        energyConsumptionMoney: -50,
+        needPlayInbound: false,
       },
       methods: {
         carry: (e) => {
@@ -80,7 +80,7 @@ class Main extends Component {
       >
         <div ref="producedGoods" class="bg-cover w-[9.6vw] aspect-[1/1]"
           style='background-image: url(./assets/images/goods_${goods.name}_${goods.loaded || !state.atTheStation ? 'off' : 'on'}@2x.png);'></div>
-        <div
+        ${state.atTheStation ? `<div
           ref="producedGoodsButton"
           class="text-[1.35vw] md:scale-75 text-white w-[5vw] aspect-[2/1] flex justify-center items-center font-[huakang] aspect-[2/1] 
           ${goods.loaded ? 'active:bg-[url(./assets/images/reselect-btn-hover.png)] bg-[url(./assets/images/reselect-btn.png)]' : 'active:bg-[url(./assets/images/btn-hover.png)] bg-[url(./assets/images/btn.png)]'} bg-cover bg-center absolute bottom-0 translate-y-1/2 cursor-pointer"
@@ -89,14 +89,14 @@ class Main extends Component {
           data-index="${idx}"
         >
           ${goods.loaded ? '卸车' : '装车'}
-        </div>
+        </div>` : ''}
       </div>`).join('')
         }
 
       <div
         ref="refreshButton"
         class="absolute right-[12vw] bottom-[2.6vh] w-[16.7vw] bg-[url('./assets/images/reset.png')] bg-cover aspect-[1/1] z-10 cursor-pointer"
-        ${state.atTheStation ? '' : 'style="filter: grayscale(100%); pointer-events:none;'}
+        ${!state.atTheStation || state.producedGoods.every(goods => goods.loaded) ? 'style="filter: grayscale(100%); pointer-events:none;' : ''}
         on-click="refreshProducedGoods"
       ></div>
 
@@ -117,7 +117,7 @@ class Main extends Component {
     this.Countdown = new Countdown({
       onOver: () => {
         this.updateState('atTheStation', false)
-        // this.trainAnimationPlay()
+        this.Scene.trainAnimationPlay()
       }
     })
 
@@ -145,11 +145,34 @@ class Main extends Component {
         this.Help.show()
       }
     })
-    this.Scene = new Scene();
+    this.Scene = new Scene({
+      onInbound: () => {
+        this.updateState('atTheStation', true)
+        this.nextLoop()
+      },
+      onOutbound: () => {
+        this.updateState('atTheStation', false)
+        new Timer(() => {
+          this.needPlayInbound = true
+        }, 2000)
+        this.Music.play('outbound')
+        this.updateState('accountBalance', this.state.accountBalance + this.state.energyConsumptionMoney)
+        this.Message.show(`消耗能源！${this.state.energyConsumptionMoney}`, 'error')
+      },
+      onAnimate: (meshes) => {
+        if (meshes.firstCabin.position.distanceTo(meshes.port.position) < 600) {
+          if (this.needPlayInbound) {
+            this.needPlayInbound = false
+            this.Music.play('inbound')
+          }
+        }
+      }
+    });
   }
 
   nextLoop() {
     this.Countdown.start()
+    this.makeProducedGoods()
   }
 
   makeProducedGoods() {

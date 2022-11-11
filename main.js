@@ -84,14 +84,6 @@ class Game {
   makeProducedGoods() {
     this.Main.makeProducedGoods()
   }
-  trainAnimationPlay() {
-    this.trainAnimation.play();
-    this.departure()
-    this.trainMixer.addEventListener('loop', (e) => {
-      this.trainAnimation.stop();
-      this.arrival()
-    });
-  }
   trade(cityIdx) {
     const successIdx = this.loadedGoods.findIndex(goods => goods === this.neededGoods[cityIdx])
     if (successIdx > -1) {

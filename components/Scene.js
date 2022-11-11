@@ -27,7 +27,7 @@ class Scene extends Component {
   countdownTimer = null
   trainAnimationTimer = null
 
-  constructor({ onLoaded } = {}) {
+  constructor({ onLoaded, onInbound, onOutbound, onAnimate } = {}) {
     super({
       state: {
         neededGoods: [],
@@ -51,6 +51,9 @@ class Scene extends Component {
       this.autoScale()
       onLoaded?.()
     })
+    this.onInbound = onInbound
+    this.onOutbound = onOutbound
+    this.onAnimate = onAnimate
   }
 
   async initCanvas() {
@@ -292,23 +295,26 @@ class Scene extends Component {
       this.trainMixer.update(delta);
 
       // 交易
-      this.cityMeshes.forEach((cityMesh, idx) => {
-        if (this.cabinMeshes[1].position.distanceTo(this.cityMeshes[idx].position) < 800) {
-          if (this.tradeRecords[idx]) { return }
-          this.tradeRecords[idx] = true
-          this.trade(idx)
-        }
-      })
+      // this.cityMeshes.forEach((cityMesh, idx) => {
+      //   if (this.cabinMeshes[1].position.distanceTo(this.cityMeshes[idx].position) < 800) {
+      //     if (this.tradeRecords[idx]) { return }
+      //     this.tradeRecords[idx] = true
+      //     this.trade(idx)
+      //   }
+      // })
 
       // 到达
-      if (this.needInboundPlay) {
-        if (this.cabinMeshes[0].position.distanceTo(this.portMesh.position) < 600) {
-          this.inboundPlay()
-          this.needInboundPlay = false
-        }
-      }
+      // if (this.needInboundPlay) {
+      //   if (this.cabinMeshes[0].position.distanceTo(this.portMesh.position) < 600) {
+      //     this.inboundPlay()
+      //     this.needInboundPlay = false
+      //   }
+      // }
     }
-
+    this.onAnimate?.({
+      firstCabin: this.cabinMeshes[0],
+      port: this.portMesh,
+    })
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -331,5 +337,16 @@ class Scene extends Component {
       return { success: true }
     }
     return { success: false }
+  }
+
+  trainAnimationPlay() {
+    this.trainAnimation.play();
+    this.onOutbound?.()
+    this.trainMixer.addEventListener('loop', (e) => {
+      this.trainAnimation.stop();
+      this.loadedGoods = [null, null, null]
+      this.updateLoadedGoodsMesh();
+      this.onInbound?.()
+    });
   }
 }

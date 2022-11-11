@@ -46,11 +46,11 @@ class Countdown extends Component {
   }
 
   start() {
+    this.updateState('countdown', 10)
     const cbFn = () => {
       this.updateState('countdown', this.state.countdown - 1)
       if (this.state.countdown === 0) {
         this.hide()
-        this.timer.clear()
         this.onOver?.()
         return
       }
@@ -74,6 +74,7 @@ class Countdown extends Component {
   }
 
   hide() {
+    this?.timer?.clear()
     this.updateState('visible', false)
   }
 }
