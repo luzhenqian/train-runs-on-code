@@ -27,7 +27,7 @@ class InitMenu extends Component {
       template: `<div
       data-show="visible"
       id="init-menu"
-      class="fixed w-full h-full z-50 flex flex-col justify-center items-center gap-[2vw]"
+      class="fixed left-0 top-0 right-0 bottom-0 z-50 flex flex-col justify-center items-center gap-[2vw]"
       >
       <div class="absolute w-full h-full bg-black opacity-90"></div>
       <div
@@ -49,7 +49,7 @@ class InitMenu extends Component {
         </div>
       </div>
       
-      <div class="flex flex-col items-center">
+      <div class="flex flex-col items-center z-50">
         <div class="text-[1.4vw] font-[huakang] text-white font-thin">
           鸣谢：@掘金 @AMD
         </div>

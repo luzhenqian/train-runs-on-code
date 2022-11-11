@@ -11,7 +11,6 @@ class Game {
   carryMoney = -5
   constructor() {
     this.initUI();
-    this.Scene = new Scene();
   }
 
   initUI() {
@@ -19,7 +18,8 @@ class Game {
     this.initMenu = new InitMenu({
       onStart: () => {
         this.play()
-        this.Main.Music.play('bgm')
+        // this.Main.Music.play('bgm')
+        this.Main.Scene.makeNeededGoods()
       }
     })
 

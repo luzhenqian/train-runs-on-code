@@ -30,7 +30,7 @@ class Scene extends Component {
   constructor({ onLoaded } = {}) {
     super({
       state: {
-        neededGoods: []
+        neededGoods: [],
       },
       template: (state) => `<div>
       ${state.neededGoods.map((goods, index) => `
@@ -47,7 +47,6 @@ class Scene extends Component {
     </div>`
     })
     this.initCanvas().then(() => {
-      this.makeNeededGoods()
       this.animate()
       this.autoScale()
       onLoaded?.()
@@ -239,19 +238,6 @@ class Scene extends Component {
     }
   }
 
-  project3Dto2D(vector3) {
-    const vector2 = new THREE.Vector3(
-      vector3.x * this.modelScale,
-      vector3.y * this.modelScale,
-      vector3.z * this.modelScale
-    ).project(this.camera)
-    let halfWidth = window.innerWidth / 2;
-    let halfHeight = this.height / 2;
-    let left = vector2.x * halfWidth + halfWidth
-    let top = -vector2.y * halfHeight + halfHeight
-    return { left, top }
-  }
-
   setDemandGoodsPosition(cityMesh, goodsEl) {
     const vector = new THREE.Vector3(
       cityMesh.position.x * this.modelScale,
@@ -266,6 +252,19 @@ class Scene extends Component {
       left,
       top
     });
+  }
+
+  project3Dto2D(vector3) {
+    const vector2 = new THREE.Vector3(
+      vector3.x * this.modelScale,
+      vector3.y * this.modelScale,
+      vector3.z * this.modelScale
+    ).project(this.camera)
+    let halfWidth = window.innerWidth / 2;
+    let halfHeight = this.height / 2;
+    let left = vector2.x * halfWidth + halfWidth
+    let top = -vector2.y * halfHeight + halfHeight
+    return { left, top }
   }
 
   makeNeededGoods() {
@@ -285,7 +284,9 @@ class Scene extends Component {
     const delta = this.clock.getDelta();
     if (this.terrainMixer) {
       this.terrainMixer.update(delta);
-      this.setAllDemandGoodsPosition()
+      if (this.state.neededGoods.length > 0) {
+        this.setAllDemandGoodsPosition()
+      }
     }
     if (!this.isPause && this.trainMixer) {
       this.trainMixer.update(delta);
@@ -310,5 +311,25 @@ class Scene extends Component {
 
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  loadGoods(goodsName) {
+    for (let i = 0; i < this.loadedGoods.length; i++) {
+      if (!!!this.loadedGoods[i]) {
+        this.loadedGoods[i] = goodsName
+        this.updateLoadedGoodsMesh()
+        return { success: true, cabinIdx: i }
+      }
+    }
+    return { success: false }
+  }
+
+  unloadGoods(cabinIdx) {
+    if (this.loadedGoods[cabinIdx]) {
+      this.loadedGoods[cabinIdx] = null
+      this.updateLoadedGoodsMesh()
+      return { success: true }
+    }
+    return { success: false }
   }
 }

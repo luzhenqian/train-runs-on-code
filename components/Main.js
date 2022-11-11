@@ -13,39 +13,35 @@ class Main extends Component {
       methods: {
         carry: (e) => {
           const idx = $(e.target).data('index')
+          const goods = this.state.producedGoods[idx].name
           // 卸载货物
           if (this.state.producedGoods[idx].loaded) {
-            // this.loadedGoods[this.producedGoods[idx].cabin] = null
-            // this.producedGoods[idx].loaded = false
-            const newVal = deepClone(this.state.producedGoods)
-
-            newVal[idx].loaded = false
-            this.updateState('producedGoods', newVal)
-            // this.accountBalance += this.carryMoney
-            // this.message.show(`卸载成功！${this.carryMoney}`, 'error')
-            // this.updateAccountBalanceUI()
+            const cabinIdx = this.state.producedGoods[idx].cabin
+            const { success } = this.Scene.unloadGoods(cabinIdx)
+            if (success) {
+              const newProducedGoods = deepClone(this.state.producedGoods)
+              newProducedGoods[idx].loaded = false
+              newProducedGoods[idx].cabin = null
+              this.updateState('producedGoods', newProducedGoods)
+              this.Message.show(`卸载成功！${this.state.carryMoney}`, 'error')
+              this.updateState('accountBalance', this.state.accountBalance + this.state.carryMoney)
+              this.Music.replay('carry')
+            }
           }
           // 选择货物
           else {
-            // const goods = this.state.producedGoods[idx].name
-            const newVal = deepClone(this.state.producedGoods)
-            newVal[idx].loaded = true
-            this.updateState('producedGoods', newVal)
-            // for (let i = 0; i < this.loadedGoods.length; i++) {
-            //   if (!!!this.loadedGoods[i]) {
-            //     this.loadedGoods[i] = goods
-            //     this.producedGoods[idx].cabin = i
-            //     this.producedGoods[idx].loaded = true
-
-            //     // this.accountBalance += this.carryMoney
-            //     // this.message.show(`搬运成功！${this.carryMoney}`, 'error')
-            //     // this.updateAccountBalanceUI()
-            //     break;
-            //   }
-            // }
+            const goods = this.state.producedGoods[idx].name
+            const { success, cabinIdx } = this.Scene.loadGoods(goods)
+            if (success) {
+              const newProducedGoods = deepClone(this.state.producedGoods)
+              newProducedGoods[idx].loaded = true
+              newProducedGoods[idx].cabin = cabinIdx
+              this.updateState('producedGoods', newProducedGoods)
+              this.Message.show(`搬运成功！${this.state.carryMoney}`, 'error')
+              this.updateState('accountBalance', this.state.accountBalance + this.state.carryMoney)
+              this.Music.replay('carry')
+            }
           }
-          this.updateState('accountBalance', this.state.accountBalance + this.state.carryMoney)
-          this.Music.replay('carry')
         },
         refreshProducedGoods: () => {
           if (this.state.accountBalance + this.state.refreshMoney + this.state.energyConsumptionMoney < 0) {
@@ -149,6 +145,7 @@ class Main extends Component {
         this.Help.show()
       }
     })
+    this.Scene = new Scene();
   }
 
   nextLoop() {
