@@ -64,11 +64,17 @@ class Countdown extends Component {
   }
 
   pause() {
+    if (this.state.countdown === 0) {
+      return
+    }
     this.loadingControl.pause()
     this.timer.pause()
   }
 
   resume() {
+    if (this.state.countdown === 0) {
+      return
+    }
     this.loadingControl.resume()
     this.timer.resume()
   }

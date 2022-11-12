@@ -21,7 +21,6 @@ class ResourceLoading extends Component {
         class="absolute top-[1.56vw] left-[4.9vw] w-[18vw]"
       />
       <div
-        id="load-resource-process-bar"
         class="flex bg-[url(./assets/images/progress@2x.png)] absolute bottom-[3.3vh] h-[6vh] w-[45vw] aspect-[13.55/1] bg-[size:100%_100%] px-[1.5vh] pt-[1.5vh] pb-[1.2vh]"
       >
         <span

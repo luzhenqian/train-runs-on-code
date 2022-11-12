@@ -1,10 +1,8 @@
 class Game {
   // ui elements
-  goodsEls = []
   gameOverEl = null
   restartButtonEl = null
   // arguments
-  countdown = 10
   isPause = false
   accountBalance = 500
   energyConsumptionMoney = -50
@@ -15,13 +13,7 @@ class Game {
 
   initUI() {
     this.Main = new Main()
-    this.initMenu = new InitMenu({
-      onStart: () => {
-        this.play()
-        this.Main.Music.play('bgm')
-        this.Main.Scene.makeNeededGoods()
-      }
-    })
+    this.Main.start()
 
     this.gameOverEl = $('#game-over')
     this.gameOverEl.hide()
@@ -49,13 +41,6 @@ class Game {
       this.needInboundPlay = true
     }, 2_000)
   }
-  checkStatus() {
-    if (this.accountBalance < 50) {
-      this.over()
-      return false
-    }
-    return true
-  }
   play() {
     this.makeProducedGoods()
     this.nextLoop()
@@ -65,7 +50,6 @@ class Game {
     this.menuEls.pause.attr('src', './assets/images/start@2x.png')
     this.menuEls.pauseText.text('开始')
     if (this.setNeedInboundPlayTimer) { this.setNeedInboundPlayTimer.pause() }
-    this.countdownTimer.pause()
     this?.trainAnimationTimer?.pause()
     this?.loadingControl?.pause()
   }
@@ -74,7 +58,6 @@ class Game {
     this.menuEls.pause.attr('src', './assets/images/pause@2x.png')
     this.menuEls.pauseText.text('暂停')
     if (this.setNeedInboundPlayTimer) { this.setNeedInboundPlayTimer.resume() }
-    this.countdownTimer.resume()
     this?.trainAnimationTimer?.resume()
     this?.loadingControl?.resume()
   }

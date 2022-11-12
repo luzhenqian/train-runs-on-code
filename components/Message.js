@@ -11,7 +11,6 @@ class Message {
     }
     const color = colors[type]
     const el = $(`<div
-    id="msg"
     class="text-[2vw] text-white fixed left-[18vw] bottom-[24vh] font-[huakang] -translate-x-1/2 text-[${color}] -translate-y-[${this.timers.length * 6}vh]"
     style="display: none; ${position ? `left: ${position.left}px; top: ${position.top}px; ${style}` : ''}" > ${text}</div > `)
     $('body').append(el)

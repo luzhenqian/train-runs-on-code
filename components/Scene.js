@@ -1,7 +1,6 @@
 const { OrbitControls, RoomEnvironment, GLTFLoader } = THREE;
 
 class Scene extends Component {
-  // three arguments
   renderer = null;
   scene = null;
   camera = null;
@@ -9,23 +8,16 @@ class Scene extends Component {
   terrainMixer = null;
   trainMixer = null;
   clock = new THREE.Clock();
-  railway = null;
   trainAnimation = null
   goodsMeshes = []
   height = window.innerHeight * 0.8
   modelScale = 0.0017
   materials = {}
-  tradeRecords = []
   // meshes
   cityMeshes = []
   cabinMeshes = []
   loadedGoods = [null, null, null]
-  producedGoods = []
   portMesh = null
-  needInboundPlay = false
-  setNeedInboundPlayTimer = null
-  countdownTimer = null
-  trainAnimationTimer = null
   isPause = false
   constructor({ onLoaded, onInbound, onOutbound, onAnimate } = {}) {
     super({

@@ -26,7 +26,6 @@ class InitMenu extends Component {
       },
       template: `<div
       data-show="visible"
-      id="init-menu"
       class="fixed left-0 top-0 right-0 bottom-0 z-50 flex flex-col justify-center items-center gap-[2vw]"
       >
       <div class="absolute w-full h-full bg-black opacity-90"></div>
@@ -34,14 +33,12 @@ class InitMenu extends Component {
         class="relative bg-[url('./assets/images/bggame.png')] bg-cover w-[30.5vw] aspect-[1.033/1]"
       >
         <div
-          id="start-button"
           class="absolute top-[15vw] left-[5.4vw] bg-[url('./assets/images/go.png')] bg-cover w-[19.6vw] aspect-[3.6/1] flex justify-center items-center text-[2.4vw] font-[huakang] text-white font-thin cursor-pointer"
           on-click="onStart"
         >
           开始游戏
         </div>
         <div
-          id="help-button"
           class="absolute top-[22vw] left-[5.4vw] bg-[url('./assets/images/rule.png')] bg-cover w-[19.6vw] aspect-[3.6/1] flex justify-center items-center text-[2.4vw] font-[huakang] text-white font-thin cursor-pointer"
           on-click="onHelp"
         >

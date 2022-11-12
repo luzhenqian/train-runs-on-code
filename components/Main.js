@@ -104,7 +104,7 @@ class Main extends Component {
       <div
         class="absolute left-[86vw] bottom-[10vh] text-white font-[huakang] z-10"
       >
-        <div id="refresh-money" class="text-[5vw]">${-state.refreshMoney}￥</div>
+        <div class="text-[5vw]">${-state.refreshMoney}￥</div>
         <div class="text-[1.55vw]">码上掘金</div>
       </div>
 
@@ -128,10 +128,14 @@ class Main extends Component {
       onPause: (isPause) => {
         if (isPause) {
           this.Countdown.pause()
-          this.Scene.pause()
+          if (this.Countdown.state.countdown === 0) {
+            this.Scene.pause()
+          }
         } else {
           this.Countdown.resume()
-          this.Scene.resume()
+          if (this.Countdown.state.countdown === 0) {
+            this.Scene.resume()
+          }
         }
       },
       onBgmPlay: (isPlay) => {
@@ -151,8 +155,9 @@ class Main extends Component {
     this.Scene = new Scene({
       onInbound: () => {
         this.updateState('atTheStation', true)
-        this.tradeRecords = []
-        this.nextLoop()
+        if (this.checkStatus()) {
+          this.nextLoop()
+        }
       },
       onOutbound: () => {
         this.updateState('atTheStation', false)
@@ -182,7 +187,17 @@ class Main extends Component {
     });
   }
 
+  start() {
+    this.InitMenu = new InitMenu({
+      onStart: () => {
+        this.Music.play('bgm')
+        this.nextLoop()
+      }
+    })
+  }
+
   nextLoop() {
+    this.tradeRecords = []
     this.Countdown.start()
     this.makeProducedGoods()
     this.Scene.makeNeededGoods();
@@ -215,6 +230,23 @@ class Main extends Component {
       this.Message.show(`交易成功！+${money}`, 'success', { left, top: top - 100 })
       this.Music.play('refresh')
     }
+  }
+
+  checkStatus() {
+    if (this.state.accountBalance < 50) {
+      this.over()
+      return false
+    }
+    return true
+  }
+
+  over() {
+    this.Over = new GameOver({
+      onRestart: () => {
+        this.updateState('accountBalance', 500)
+        this.nextLoop()
+      }
+    })
   }
 }
 
