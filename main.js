@@ -18,7 +18,7 @@ class Game {
     this.initMenu = new InitMenu({
       onStart: () => {
         this.play()
-        // this.Main.Music.play('bgm')
+        this.Main.Music.play('bgm')
         this.Main.Scene.makeNeededGoods()
       }
     })
@@ -83,21 +83,6 @@ class Game {
   }
   makeProducedGoods() {
     this.Main.makeProducedGoods()
-  }
-  trade(cityIdx) {
-    const successIdx = this.loadedGoods.findIndex(goods => goods === this.neededGoods[cityIdx])
-    if (successIdx > -1) {
-      const goods = this.loadedGoods[successIdx]
-      this.goodsMeshes[successIdx].visible = false
-      this.loadedGoods[successIdx] = null
-      // this.neededGoodsEls[cityIdx].hide()
-      const money = allGoods[goods].price
-      this.accountBalance += money
-      const vector = this.cabinMeshes[successIdx].position
-      // const { left, top } = this.project3Dto2D(vector)
-      // this.message.show(`交易成功！+${money}`, 'success', { left, top: top - 100 })
-      this.refreshMusicPlay()
-    }
   }
   over() {
     this.gameOverEl.show()

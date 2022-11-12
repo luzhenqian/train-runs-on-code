@@ -26,7 +26,7 @@ class Scene extends Component {
   setNeedInboundPlayTimer = null
   countdownTimer = null
   trainAnimationTimer = null
-
+  isPause = false
   constructor({ onLoaded, onInbound, onOutbound, onAnimate } = {}) {
     super({
       state: {
@@ -38,10 +38,11 @@ class Scene extends Component {
         class="flex justify-center items-center w-[8.85vw] fixed aspect-[1.3/1] -translate-x-full -translate-y-1/2"
         ref="neededGoods${index}"
       >
-        <div
-          class="absolute w-full h-full bg-[url('./assets/images/bubble.jpg')] bg-cover opacity-50"
-        ></div>
-        <img class="w-1/2 z-10"  src="./assets/images/goods_${goods}_on@3x.png"/>
+      ${goods ? `<div
+      class="absolute w-full h-full bg-[url('./assets/images/bubble.jpg')] bg-cover opacity-50"
+    ></div>
+    <img class="w-1/2 z-10"  src="./assets/images/goods_${goods}_on@3x.png"/>` :
+          ''}
       </div>
       `).join('')}
     </div>`
@@ -177,7 +178,6 @@ class Scene extends Component {
   async loadTrainModel() {
     return new Promise((resolve) => {
       const loader = new GLTFLoader();
-
       loader.load('./assets/model/train.gltf', (gltf) => {
         const model = gltf.scene;
         model.scale.set(this.modelScale, this.modelScale, this.modelScale);
@@ -202,11 +202,8 @@ class Scene extends Component {
             this.goodsMeshes[2] = child;
           }
         })
-
         this.updateLoadedGoodsMesh()
-
         this.scene.add(model);
-
         // Create a mixer
         this.trainMixer = new THREE.AnimationMixer(model);
         this.trainAnimation = this.trainMixer.clipAction(gltf.animations[0])
@@ -293,28 +290,8 @@ class Scene extends Component {
     }
     if (!this.isPause && this.trainMixer) {
       this.trainMixer.update(delta);
-
-      // 交易
-      // this.cityMeshes.forEach((cityMesh, idx) => {
-      //   if (this.cabinMeshes[1].position.distanceTo(this.cityMeshes[idx].position) < 800) {
-      //     if (this.tradeRecords[idx]) { return }
-      //     this.tradeRecords[idx] = true
-      //     this.trade(idx)
-      //   }
-      // })
-
-      // 到达
-      // if (this.needInboundPlay) {
-      //   if (this.cabinMeshes[0].position.distanceTo(this.portMesh.position) < 600) {
-      //     this.inboundPlay()
-      //     this.needInboundPlay = false
-      //   }
-      // }
+      this.onAnimate?.()
     }
-    this.onAnimate?.({
-      firstCabin: this.cabinMeshes[0],
-      port: this.portMesh,
-    })
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }
@@ -348,5 +325,13 @@ class Scene extends Component {
       this.updateLoadedGoodsMesh();
       this.onInbound?.()
     });
+  }
+
+  pause() {
+    this.isPause = true
+  }
+
+  resume() {
+    this.isPause = false
   }
 }

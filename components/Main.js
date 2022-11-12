@@ -1,4 +1,5 @@
 class Main extends Component {
+  tradeRecords = []
   constructor() {
     super({
       state: {
@@ -127,8 +128,10 @@ class Main extends Component {
       onPause: (isPause) => {
         if (isPause) {
           this.Countdown.pause()
+          this.Scene.pause()
         } else {
           this.Countdown.resume()
+          this.Scene.resume()
         }
       },
       onBgmPlay: (isPlay) => {
@@ -148,6 +151,7 @@ class Main extends Component {
     this.Scene = new Scene({
       onInbound: () => {
         this.updateState('atTheStation', true)
+        this.tradeRecords = []
         this.nextLoop()
       },
       onOutbound: () => {
@@ -159,13 +163,21 @@ class Main extends Component {
         this.updateState('accountBalance', this.state.accountBalance + this.state.energyConsumptionMoney)
         this.Message.show(`消耗能源！${this.state.energyConsumptionMoney}`, 'error')
       },
-      onAnimate: (meshes) => {
-        if (meshes.firstCabin.position.distanceTo(meshes.port.position) < 600) {
+      onAnimate: () => {
+        if (this.Scene.cabinMeshes[1].position.distanceTo(this.Scene.portMesh.position) < 600) {
           if (this.needPlayInbound) {
             this.needPlayInbound = false
             this.Music.play('inbound')
           }
         }
+        // 抵达城市
+        this.Scene.cityMeshes.forEach((cityMesh, idx) => {
+          if (this.Scene.cabinMeshes[1].position.distanceTo(this.Scene.cityMeshes[idx].position) < 800) {
+            if (this.tradeRecords[idx]) { return }
+            this.tradeRecords[idx] = true
+            this.trade(idx)
+          }
+        })
       }
     });
   }
@@ -173,6 +185,7 @@ class Main extends Component {
   nextLoop() {
     this.Countdown.start()
     this.makeProducedGoods()
+    this.Scene.makeNeededGoods();
   }
 
   makeProducedGoods() {
@@ -184,15 +197,24 @@ class Main extends Component {
         name: goods.name,
         loaded: false
       }
-      // this.goodsEls[i].css(
-      //   'background-image',
-      //   `url(./assets/images/goods_${goods}_on@2x.png)`)
-      // this.goodsEls[i].data(
-      //   'goods',
-      //   goods
-      // )
     }
     this.updateState('producedGoods', newProducedGoods)
+  }
+
+  trade(cityIdx) {
+    const successIdx = this.Scene.loadedGoods.findIndex(goods => goods === this.Scene.state.neededGoods[cityIdx])
+    if (successIdx > -1) {
+      const goods = this.Scene.loadedGoods[successIdx]
+      this.Scene.goodsMeshes[successIdx].visible = false
+      this.Scene.loadedGoods[successIdx] = null
+      this.Scene.updateState('neededGoods', this.Scene.state.neededGoods.map((goods, idx) => idx === cityIdx ? null : goods))
+      const money = allGoods[goods].price
+      this.updateState('accountBalance', this.state.accountBalance += money)
+      const vector = this.Scene.cabinMeshes[successIdx].position
+      const { left, top } = this.Scene.project3Dto2D(vector)
+      this.Message.show(`交易成功！+${money}`, 'success', { left, top: top - 100 })
+      this.Music.play('refresh')
+    }
   }
 }
 
