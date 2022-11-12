@@ -10,10 +10,15 @@ class Main extends Component {
         refreshMoney: -20,
         energyConsumptionMoney: -50,
         needPlayInbound: false,
+        isPaused: false
       },
       methods: {
         carry: (e) => {
           const idx = $(e.target).data('index')
+          if (this.state.accountBalance <= -(this.state.energyConsumptionMoney + this.state.carryMoney)) {
+            this.Message.show(`操作失败！${this.state.carryMoney}`, 'error')
+            return
+          }
           const goods = this.state.producedGoods[idx].name
           // 卸载货物
           if (this.state.producedGoods[idx].loaded) {
@@ -80,8 +85,8 @@ class Main extends Component {
         class="flex flex-col items-center absolute bottom-[7.7vh] left-[${33 + idx * 13}vw]"
       >
         <div ref="producedGoods" class="bg-cover w-[9.6vw] aspect-[1/1]"
-          style='background-image: url(./assets/images/goods_${goods.name}_${goods.loaded || !state.atTheStation ? 'off' : 'on'}@2x.png);'></div>
-        ${state.atTheStation ? `<div
+          style='background-image: url(./assets/images/goods_${goods.name}_${goods.loaded || !state.atTheStation || state.isPaused ? 'off' : 'on'}@2x.png);'></div>
+        ${state.atTheStation && !state.isPaused ? `<div
           ref="producedGoodsButton"
           class="text-[1.35vw] md:scale-75 text-white w-[5vw] aspect-[2/1] flex justify-center items-center font-[huakang] aspect-[2/1] 
           ${goods.loaded ? 'active:bg-[url(./assets/images/reselect-btn-hover.png)] bg-[url(./assets/images/reselect-btn.png)]' : 'active:bg-[url(./assets/images/btn-hover.png)] bg-[url(./assets/images/btn.png)]'} bg-cover bg-center absolute bottom-0 translate-y-1/2 cursor-pointer"
@@ -97,7 +102,7 @@ class Main extends Component {
       <div
         ref="refreshButton"
         class="absolute right-[12vw] bottom-[2.6vh] w-[16.7vw] bg-[url('./assets/images/reset.png')] bg-cover aspect-[1/1] z-10 cursor-pointer"
-        ${!state.atTheStation || state.producedGoods.every(goods => goods.loaded) ? 'style="filter: grayscale(100%); pointer-events:none;' : ''}
+        ${!state.atTheStation || state.isPaused || state.producedGoods.every(goods => goods.loaded) ? 'style="filter: grayscale(100%); pointer-events:none;' : ''}
         on-click="refreshProducedGoods"
       ></div>
 
@@ -127,15 +132,9 @@ class Main extends Component {
     this.Menu = new Menu({
       onPause: (isPause) => {
         if (isPause) {
-          this.Countdown.pause()
-          if (this.Countdown.state.countdown === 0) {
-            this.Scene.pause()
-          }
+          this.pause()
         } else {
-          this.Countdown.resume()
-          if (this.Countdown.state.countdown === 0) {
-            this.Scene.resume()
-          }
+          this.resume()
         }
       },
       onBgmPlay: (isPlay) => {
@@ -240,13 +239,32 @@ class Main extends Component {
     return true
   }
 
+  pause() {
+    this.updateState('isPaused', true)
+    this.Countdown.pause()
+    if (this.Countdown.state.countdown === 0) {
+      this.Scene.pause()
+    }
+  }
+
+  resume() {
+    this.updateState('isPaused', false)
+    this.Countdown.resume()
+    if (this.Countdown.state.countdown === 0) {
+      this.Scene.resume()
+    }
+  }
+
   over() {
-    this.Over = new GameOver({
-      onRestart: () => {
-        this.updateState('accountBalance', 500)
-        this.nextLoop()
-      }
-    })
+    if (!this.Over) {
+      this.Over = new GameOver({
+        onRestart: () => {
+          this.updateState('accountBalance', 500)
+          this.nextLoop()
+        }
+      })
+    }
+    this.Over.show()
   }
 }
 
