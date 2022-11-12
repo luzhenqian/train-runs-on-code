@@ -1,5 +1,6 @@
 class Main extends Component {
   tradeRecords = []
+  setNeedInboundPlayTimer = null
   constructor() {
     super({
       state: {
@@ -161,7 +162,7 @@ class Main extends Component {
       },
       onOutbound: () => {
         this.updateState('atTheStation', false)
-        new Timer(() => {
+        this.setNeedInboundPlayTimer = new Timer(() => {
           this.needPlayInbound = true
         }, 2000)
         this.Music.play('outbound')
@@ -243,6 +244,7 @@ class Main extends Component {
   pause() {
     this.updateState('isPaused', true)
     this.Countdown.pause()
+    this.setNeedInboundPlayTimer?.pause()
     if (this.Countdown.state.countdown === 0) {
       this.Scene.pause()
     }
@@ -251,6 +253,7 @@ class Main extends Component {
   resume() {
     this.updateState('isPaused', false)
     this.Countdown.resume()
+    this.setNeedInboundPlayTimer?.resume()
     if (this.Countdown.state.countdown === 0) {
       this.Scene.resume()
     }

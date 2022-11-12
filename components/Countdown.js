@@ -46,6 +46,7 @@ class Countdown extends Component {
   }
 
   start() {
+    this?.timer?.clear()
     this.updateState('countdown', 10)
     const cbFn = () => {
       this.updateState('countdown', this.state.countdown - 1)
