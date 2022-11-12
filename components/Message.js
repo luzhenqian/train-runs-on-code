@@ -16,10 +16,11 @@ class Message {
     $('body').append(el)
     el.fadeIn()
     const timer = setTimeout(() => {
-      el.fadeOut()
-      const idx = this.timers.findIndex(t => t === timer)
-      this.timers.splice(idx, 1)
-      el.remove()
+      el.fadeOut(400, () => {
+        const idx = this.timers.findIndex(t => t === timer)
+        this.timers.splice(idx, 1)
+        el.remove()
+      })
     }, duration)
     this.timers.push(timer)
   }

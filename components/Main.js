@@ -50,8 +50,9 @@ class Main extends Component {
           }
         },
         refreshProducedGoods: () => {
+          const { left, top } = this.refs.refreshButton[0].getBoundingClientRect()
           if (this.state.accountBalance + this.state.refreshMoney + this.state.energyConsumptionMoney < 0) {
-            this.Message.show('余额不足', 'error')
+            this.Message.show('余额不足', 'error', { left, top }, 'transform: translate(50%, -100%);')
             return
           }
           const newProducedGoods = deepClone(this.state.producedGoods.map(goods => {
@@ -62,7 +63,7 @@ class Main extends Component {
             }
             return goods
           }))
-          const { left, top } = this.refs.refreshButton[0].getBoundingClientRect()
+
           this.Message.show(`刷新成功！${this.state.refreshMoney}`, 'error', { left, top }, 'transform: translate(50%, -100%);')
           this.updateState('producedGoods', newProducedGoods)
           this.updateState('accountBalance', this.state.accountBalance + this.state.refreshMoney)

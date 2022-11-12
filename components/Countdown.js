@@ -12,9 +12,9 @@ class Countdown extends Component {
       data-show="visible"
       class="flex flex-col items-center fixed top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-10"
     >
-      <span class="text-white font-[huakang] text-[2.8vw]"
-        >码上掘金 即将到来</span
-      >
+      <span class="text-white font-[huakang] text-[2.8vw]">
+        码上掘金 即将到来
+      </span>
       <img ref="loadingImage" />
       <span 
         class="text-white font-[huakang] text-[2.8vw]"
